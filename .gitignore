@@ -1,0 +1,16 @@
+.DS_Store
+node_modules/
+dist/
+data/
+.env
+.env.local
+.env.*.local
+*.log
+*.sqlite
+*.sqlite3
+*.update-manifest.json
+*.update-private-key*
+.env.*
+!.env.example
+*.tgz
+coverage/

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluation>
+  <qa_pair>
+    <question>Resolve Focus#EU and list the recent games. Open the selected match cache-match-1 in eu/pc and cross-check its map against the round explanation. Which map contains the recorded duel? Answer with the map name only.</question>
+    <answer>Haven</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In synthetic match cache-match-1 (eu/pc), Focus#EU calls the score at their death "0-0". Compare the whole-match timeline with the score-selected round explanation. What is the score immediately after this round from Focus’s perspective? Answer A-B.</question>
+    <answer>0-1</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For cache-match-1 in eu/pc, a user says Focus#EU won the round containing their first death. Reconcile the death review with the explained winner and perspective. Is the focused outcome win, loss, or unknown?</question>
+    <answer>loss</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In cache-match-1 (eu/pc), identify the player who eliminated Focus#EU from the death evidence, then verify that player’s agent against the raw players section. Return only the agent name.</question>
+    <answer>Omen</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For Focus#EU’s first death in cache-match-1 (eu/pc), compare the death review with the numbered kill list for the containing round. Which weapon caused the recorded kill? Return only its name.</question>
+    <answer>Vandal</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In cache-match-1 (eu/pc), reconcile Focus#EU’s death with the numbered round-kill timeline. How many seconds after round start did the closing elimination occur? Return an integer, converting provider milliseconds if necessary.</question>
+    <answer>18</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Review Focus#EU’s first death and teammate-relative position in cache-match-1 (eu/pc). Which nearest map callout anchor do both results associate with the victim? Return the full callout name; do not invent a plant site.</question>
+    <answer>Mid Courtyard</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For cache-match-1 (eu/pc), compare the attention models in Focus#EU’s death review and position replay. What horizontal field-of-view assumption in degrees is shared by the geometric analyses? Return an integer; do not treat the cone as proof of vision.</question>
+    <answer>103</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A user blames a nearby teammate for not trading Focus#EU in cache-match-1 (eu/pc). Compare the death-review support snapshot with the position review. How many recorded living teammates have usable positional context there? Return an integer.</question>
+    <answer>0</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For cache-match-1 (eu/pc), inspect the raw kill-event positions before rendering the exact round-one duel with default participants. How many spatial samples does the tactical render actually report? Return an integer.</question>
+    <answer>2</answer>
+  </qa_pair>
+</evaluation>

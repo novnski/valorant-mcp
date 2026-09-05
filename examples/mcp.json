@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "valorant": {
+      "command": "bun",
+      "args": ["--env-file=/absolute/path/to/valorant-mcp/.env", "/absolute/path/to/valorant-mcp/dist/mcp/server.js"]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "valorant": {
+      "url": "http://127.0.0.1:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer REPLACE_WITH_YOUR_LOCAL_MCP_TOKEN"
+      }
+    }
+  }
+}
