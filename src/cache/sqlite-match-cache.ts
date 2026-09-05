@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+import { query, transaction } from "./query";
 
 import { normalizeMapSpatialPosition } from "../domain/map-spatial-resources";
 import type { MatchDetail } from "../domain/types";
@@ -63,13 +64,12 @@ export class SqliteMatchCache implements MatchCache {
   }
 
   readMatch(matchId: string, platform: string): CachedMatchRead | null {
-    const row = this.db
-      .query(
-        `SELECT match_id, platform, region, raw_json, payload_hash, completeness_score, source_endpoint,
+    const row = query(
+      this.db,
+      `SELECT match_id, platform, region, raw_json, payload_hash, completeness_score, source_endpoint,
               base_projection_json, base_projection_version, base_projection_input_hash, first_saved_at
        FROM cached_matches WHERE match_id = ? AND platform = ? LIMIT 1`,
-      )
-      .get(matchId, platform) as MatchRow | null;
+    ).get(matchId, platform) as MatchRow | null;
     if (!row) return null;
     let raw: unknown;
     let baseProjection: MatchDetail | null = null;
@@ -90,9 +90,11 @@ export class SqliteMatchCache implements MatchCache {
         baseProjection = null;
       }
     }
-    this.db
-      .query(`UPDATE cached_matches SET last_accessed_at = ? WHERE match_id = ? AND platform = ?`)
-      .run(new Date().toISOString(), matchId, platform);
+    query(this.db, `UPDATE cached_matches SET last_accessed_at = ? WHERE match_id = ? AND platform = ?`).run(
+      new Date().toISOString(),
+      matchId,
+      platform,
+    );
     return {
       matchId: row.match_id,
       platform: row.platform,
@@ -115,15 +117,14 @@ export class SqliteMatchCache implements MatchCache {
     focusPuuid: string | null,
     payloadHash: string,
   ): CachedFocusProjectionRead | null {
-    const row = this.db
-      .query(
-        `SELECT projection_json, projected_at, input_payload_hash
+    const row = query(
+      this.db,
+      `SELECT projection_json, projected_at, input_payload_hash
        FROM cached_focus_projections
        WHERE match_id = ? AND platform = ? AND focus_key = ?
          AND projection_version = ? AND input_payload_hash = ?
        LIMIT 1`,
-      )
-      .get(matchId, platform, focusKey(focusPuuid), matchFocusProjectionVersion, payloadHash) as FocusRow | null;
+    ).get(matchId, platform, focusKey(focusPuuid), matchFocusProjectionVersion, payloadHash) as FocusRow | null;
     if (!row) return null;
     try {
       return {
@@ -146,13 +147,12 @@ export class SqliteMatchCache implements MatchCache {
     const payloadHash = sha256(rawJson);
     const score = matchCompletenessScore(input.baseProjection);
     const now = new Date().toISOString();
-    return this.db.transaction(() => {
-      const existing = this.db
-        .query(
-          `SELECT payload_hash, completeness_score, first_saved_at, source_endpoint
+    return transaction(this.db, () => {
+      const existing = query(
+        this.db,
+        `SELECT payload_hash, completeness_score, first_saved_at, source_endpoint
          FROM cached_matches WHERE match_id = ? AND platform = ? LIMIT 1`,
-        )
-        .get(input.matchId, input.platform) as {
+      ).get(input.matchId, input.platform) as {
         payload_hash: string;
         completeness_score: number;
         first_saved_at: string;
@@ -165,19 +165,18 @@ export class SqliteMatchCache implements MatchCache {
             existing.source_endpoint === "match-detail-v4" &&
             input.sourceEndpoint === "recent-list-v4"));
       if (existingIsRicher) {
-        this.db
-          .query(
-            `UPDATE cached_matches SET last_accessed_at = ?, last_validated_at = ?
+        query(
+          this.db,
+          `UPDATE cached_matches SET last_accessed_at = ?, last_validated_at = ?
            WHERE match_id = ? AND platform = ?`,
-          )
-          .run(now, now, input.matchId, input.platform);
+        ).run(now, now, input.matchId, input.platform);
         return { savedAt: existing.first_saved_at, payloadHash: existing.payload_hash, projected: false };
       }
 
       const projectionJson = stableJson({ ...input.baseProjection, source: "cache" });
-      this.db
-        .query(
-          `INSERT INTO cached_matches (
+      query(
+        this.db,
+        `INSERT INTO cached_matches (
           match_id, platform, region, mode, map_name, season_id, game_version, started_at, duration_ms,
           raw_json, payload_hash, completeness_score, completeness_json, source_endpoint,
           base_projection_json, base_projection_version, base_projection_input_hash,
@@ -201,40 +200,41 @@ export class SqliteMatchCache implements MatchCache {
           base_projection_input_hash = excluded.base_projection_input_hash,
           last_validated_at = excluded.last_validated_at,
           last_accessed_at = excluded.last_accessed_at`,
-        )
-        .run(
-          input.matchId,
-          input.platform,
-          input.region,
-          input.baseProjection.mode,
-          input.baseProjection.mapName,
-          seasonId(scrubbed),
-          input.baseProjection.gameVersion,
-          input.baseProjection.startedAt,
-          input.baseProjection.durationMs,
-          rawJson,
-          payloadHash,
-          score,
-          stableJson(completeness(input.baseProjection)),
-          input.sourceEndpoint,
-          projectionJson,
-          matchBaseProjectionVersion,
-          payloadHash,
-          existing?.first_saved_at ?? now,
-          now,
-          now,
-        );
+      ).run(
+        input.matchId,
+        input.platform,
+        input.region,
+        input.baseProjection.mode,
+        input.baseProjection.mapName,
+        seasonId(scrubbed),
+        input.baseProjection.gameVersion,
+        input.baseProjection.startedAt,
+        input.baseProjection.durationMs,
+        rawJson,
+        payloadHash,
+        score,
+        stableJson(completeness(input.baseProjection)),
+        input.sourceEndpoint,
+        projectionJson,
+        matchBaseProjectionVersion,
+        payloadHash,
+        existing?.first_saved_at ?? now,
+        now,
+        now,
+      );
       replaceNormalizedRows(this.db, input.baseProjection);
       if (existing && existing.payload_hash !== payloadHash) {
-        this.db
-          .query(`DELETE FROM cached_focus_projections WHERE match_id = ? AND platform = ?`)
-          .run(input.matchId, input.platform);
-        this.db
-          .query(`DELETE FROM cached_derived_projections WHERE match_id = ? AND platform = ?`)
-          .run(input.matchId, input.platform);
+        query(this.db, `DELETE FROM cached_focus_projections WHERE match_id = ? AND platform = ?`).run(
+          input.matchId,
+          input.platform,
+        );
+        query(this.db, `DELETE FROM cached_derived_projections WHERE match_id = ? AND platform = ?`).run(
+          input.matchId,
+          input.platform,
+        );
       }
       return { savedAt: existing?.first_saved_at ?? now, payloadHash, projected: true };
-    })();
+    });
   }
 
   saveFocusProjection(
@@ -245,9 +245,9 @@ export class SqliteMatchCache implements MatchCache {
     detail: MatchDetail,
   ): void {
     const now = new Date().toISOString();
-    this.db
-      .query(
-        `INSERT INTO cached_focus_projections (
+    query(
+      this.db,
+      `INSERT INTO cached_focus_projections (
         match_id, platform, focus_key, projection_version, input_payload_hash, projection_json, projected_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(match_id, platform, focus_key) DO UPDATE SET
@@ -255,16 +255,15 @@ export class SqliteMatchCache implements MatchCache {
         input_payload_hash = excluded.input_payload_hash,
         projection_json = excluded.projection_json,
         projected_at = excluded.projected_at`,
-      )
-      .run(
-        matchId,
-        platform,
-        focusKey(focusPuuid),
-        matchFocusProjectionVersion,
-        payloadHash,
-        stableJson({ ...detail, source: "cache" }),
-        now,
-      );
+    ).run(
+      matchId,
+      platform,
+      focusKey(focusPuuid),
+      matchFocusProjectionVersion,
+      payloadHash,
+      stableJson({ ...detail, source: "cache" }),
+      now,
+    );
   }
 
   readDerivedProjection<T>(
@@ -275,14 +274,13 @@ export class SqliteMatchCache implements MatchCache {
     version: string,
     payloadHash: string,
   ): T | null {
-    const row = this.db
-      .query(
-        `SELECT projection_json FROM cached_derived_projections
+    const row = query(
+      this.db,
+      `SELECT projection_json FROM cached_derived_projections
        WHERE match_id = ? AND platform = ? AND focus_key = ? AND projection_kind = ?
          AND projection_version = ? AND input_payload_hash = ?
        LIMIT 1`,
-      )
-      .get(matchId, platform, focusKey(focusPuuid), kind, version, payloadHash) as { projection_json: string } | null;
+    ).get(matchId, platform, focusKey(focusPuuid), kind, version, payloadHash) as { projection_json: string } | null;
     if (!row) return null;
     try {
       return JSON.parse(row.projection_json) as T;
@@ -300,9 +298,9 @@ export class SqliteMatchCache implements MatchCache {
     payloadHash: string,
     value: unknown,
   ): void {
-    this.db
-      .query(
-        `INSERT INTO cached_derived_projections (
+    query(
+      this.db,
+      `INSERT INTO cached_derived_projections (
         match_id, platform, focus_key, projection_kind, projection_version,
         input_payload_hash, projection_json, projected_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -311,25 +309,24 @@ export class SqliteMatchCache implements MatchCache {
         input_payload_hash = excluded.input_payload_hash,
         projection_json = excluded.projection_json,
         projected_at = excluded.projected_at`,
-      )
-      .run(
-        matchId,
-        platform,
-        focusKey(focusPuuid),
-        kind,
-        version,
-        payloadHash,
-        stableJson(value),
-        new Date().toISOString(),
-      );
+    ).run(
+      matchId,
+      platform,
+      focusKey(focusPuuid),
+      kind,
+      version,
+      payloadHash,
+      stableJson(value),
+      new Date().toISOString(),
+    );
   }
 
   countMatches(): number {
-    return (this.db.query(`SELECT COUNT(*) AS count FROM cached_matches`).get() as { count: number }).count;
+    return (query(this.db, `SELECT COUNT(*) AS count FROM cached_matches`).get() as { count: number }).count;
   }
 
   close(): void {
-    this.db.close();
+    this.db.close(true);
   }
 }
 
@@ -504,7 +501,7 @@ function migrate(db: Database): void {
   `);
   ensureColumn(db, "cached_round_players", "deaths", "deaths INTEGER");
   ensureColumn(db, "cached_round_players", "assists", "assists INTEGER");
-  const version = (db.query(`PRAGMA user_version`).get() as { user_version: number }).user_version;
+  const version = (query(db, `PRAGMA user_version`).get() as { user_version: number }).user_version;
   if (version > schemaVersion)
     throw new MatchCacheError(`Match cache schema ${version} is newer than supported schema ${schemaVersion}`);
   db.exec(`PRAGMA user_version = ${schemaVersion}`);
@@ -512,11 +509,11 @@ function migrate(db: Database): void {
 
 function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
   const key = [detail.matchId, detail.platform];
-  db.query(`DELETE FROM cached_event_positions WHERE match_id = ? AND platform = ?`).run(...key);
-  db.query(`DELETE FROM cached_kill_events WHERE match_id = ? AND platform = ?`).run(...key);
-  db.query(`DELETE FROM cached_round_players WHERE match_id = ? AND platform = ?`).run(...key);
-  db.query(`DELETE FROM cached_match_rounds WHERE match_id = ? AND platform = ?`).run(...key);
-  db.query(`DELETE FROM cached_match_players WHERE match_id = ? AND platform = ?`).run(...key);
+  query(db, `DELETE FROM cached_event_positions WHERE match_id = ? AND platform = ?`).run(...key);
+  query(db, `DELETE FROM cached_kill_events WHERE match_id = ? AND platform = ?`).run(...key);
+  query(db, `DELETE FROM cached_round_players WHERE match_id = ? AND platform = ?`).run(...key);
+  query(db, `DELETE FROM cached_match_rounds WHERE match_id = ? AND platform = ?`).run(...key);
+  query(db, `DELETE FROM cached_match_players WHERE match_id = ? AND platform = ?`).run(...key);
 
   const playerByKey = new Map<
     string,
@@ -526,7 +523,8 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
     for (const player of team.players) {
       const keyValue = player.puuid ?? `${player.gameName.toLowerCase()}#${player.tagLine?.toLowerCase() ?? ""}`;
       playerByKey.set(keyValue, player);
-      db.query(
+      query(
+        db,
         `INSERT INTO cached_match_players (
           match_id, platform, puuid, game_name, tag_line, team_id, party_id, agent_name,
           tier_id, tier_name, score, kills, deaths, assists, acs, adr, kast, damage_delta,
@@ -565,7 +563,8 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
 
   const roundEvidence = new MatchRoundEvidenceService().analyze(detail);
   for (const round of detail.rounds) {
-    db.query(
+    query(
+      db,
       `INSERT INTO cached_match_rounds (
         match_id, platform, round_number, winning_team, result, ceremony,
         spike_plant_json, spike_defuse_json, team_scores_json
@@ -591,7 +590,8 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
             ? player.puuid === candidate.puuid
             : identityKey === `${candidate.gameName.toLowerCase()}#${candidate.tagLine?.toLowerCase() ?? ""}`,
         );
-      db.query(
+      query(
+        db,
         `INSERT INTO cached_round_players (
           match_id, platform, round_number, player_key, puuid, game_name, tag_line, team_id,
           score, kills, deaths, assists, loadout_value, remaining_credits, weapon_name, armor_name,
@@ -626,7 +626,8 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
   }
 
   detail.killEvents.forEach((event, eventIndex) => {
-    db.query(
+    query(
+      db,
       `INSERT INTO cached_kill_events (
         match_id, platform, event_index, raw_round, time_in_round_ms, time_in_match_ms,
         killer_puuid, killer_name, killer_team, victim_puuid, victim_name, victim_team,
@@ -656,7 +657,8 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
       const callout = nearestMapCallout(detail.mapName, location.location);
       const rosterKey = location.puuid ?? `${location.gameName.toLowerCase()}#${location.tagLine?.toLowerCase() ?? ""}`;
       const roster = playerByKey.get(rosterKey);
-      db.query(
+      query(
+        db,
         `INSERT INTO cached_event_positions (
           match_id, platform, event_index, position_index, puuid, game_name, tag_line, team_id,
           agent_name, raw_x, raw_y, map_x, map_y, view_radians, map_facing_radians,
@@ -689,7 +691,7 @@ function replaceNormalizedRows(db: Database, detail: MatchDetail): void {
 }
 
 function ensureColumn(db: Database, table: string, column: string, definition: string): void {
-  const columns = db.query(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  const columns = query(db, `PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
   if (!columns.some((candidate) => candidate.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${definition}`);
 }
 
