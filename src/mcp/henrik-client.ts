@@ -1,3 +1,5 @@
+import { ProviderTransport, ProviderTransportError } from "./provider-transport";
+import { accountPayload, matchPayload, rankPayload } from "./provider-validation";
 export type HenrikAccount = {
   puuid: string;
   region?: string;
@@ -19,6 +21,7 @@ type HenrikEnvelope<T> = {
 type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 export type HenrikFailureCode =
+  | "cancelled"
   | "missing-config"
   | "invalid-config"
   | "not-found"
@@ -45,14 +48,13 @@ export class HenrikApiError extends Error {
 
 export class HenrikClient {
   private readonly baseUrl = "https://api.henrikdev.xyz";
-  private readonly timeoutMs = 12_000;
-  private nextRequestAt = 0;
-  private throttleChain: Promise<void> = Promise.resolve();
+  private readonly transport: ProviderTransport;
 
   constructor(
     private readonly apiKey: string,
     private readonly requestsPerMinute = 30,
-    private readonly fetchImpl: Fetcher = fetch,
+    fetchImpl: Fetcher = fetch,
+    options: { timeoutMs?: number } = {},
   ) {
     if (!apiKey.trim()) throw new HenrikApiError("HENRIK_API_KEY is required", null, "missing-config");
     if (!Number.isInteger(requestsPerMinute) || requestsPerMinute < 1 || requestsPerMinute > 300) {
@@ -62,6 +64,12 @@ export class HenrikClient {
         "invalid-config",
       );
     }
+    this.transport = new ProviderTransport(
+      "henrik",
+      Math.ceil(60_000 / requestsPerMinute),
+      fetchImpl,
+      options.timeoutMs,
+    );
   }
 
   static fromEnv(env: NodeJS.ProcessEnv = process.env): HenrikClient {
@@ -76,6 +84,8 @@ export class HenrikClient {
     );
     if (!envelope.data)
       throw new HenrikApiError(`No Henrik account data for ${name}#${tag}`, envelope.status, "not-found");
+    if (!accountPayload.safeParse(envelope.data).success)
+      throw new HenrikApiError("Invalid account fields", envelope.status, "invalid-payload");
     return envelope.data;
   }
 
@@ -83,6 +93,8 @@ export class HenrikClient {
     const envelope = await this.get<HenrikAccount>(`/valorant/v2/by-puuid/account/${encodeURIComponent(puuid)}`);
     if (!envelope.data)
       throw new HenrikApiError(`No Henrik account data for PUUID ${puuid}`, envelope.status, "not-found");
+    if (!accountPayload.safeParse(envelope.data).success)
+      throw new HenrikApiError("Invalid account fields", envelope.status, "invalid-payload");
     return envelope.data;
   }
 
@@ -90,6 +102,8 @@ export class HenrikClient {
     const envelope = await this.get<unknown>(
       `/valorant/v3/by-puuid/mmr/${encodeURIComponent(region)}/${encodeURIComponent(platform)}/${encodeURIComponent(puuid)}`,
     );
+    if (!rankPayload.safeParse(envelope.data ?? null).success)
+      throw new HenrikApiError("Invalid rank fields", envelope.status, "invalid-payload");
     return envelope.data ?? null;
   }
 
@@ -99,17 +113,22 @@ export class HenrikClient {
     puuid: string,
     size = 10,
     mode?: string,
+    map?: string,
+    start = 0,
   ): Promise<unknown[]> {
     const path = `/valorant/v4/by-puuid/matches/${encodeURIComponent(region)}/${encodeURIComponent(platform)}/${encodeURIComponent(puuid)}`;
     const targetSize = Math.min(20, Math.max(1, Math.floor(size)));
     const rows: unknown[] = [];
     while (rows.length < targetSize) {
       const pageSize = Math.min(10, targetSize - rows.length);
-      const params = new URLSearchParams({ size: String(pageSize), start: String(rows.length) });
+      const params = new URLSearchParams({ size: String(pageSize), start: String(start + rows.length) });
       if (mode) params.set("mode", mode);
+      if (map) params.set("map", map);
       const envelope = await this.get<unknown[]>(`${path}?${params.toString()}`);
-      const page = Array.isArray(envelope.data) ? envelope.data : [];
-      rows.push(...page);
+      if (!Array.isArray(envelope.data) || !envelope.data.every((row) => matchPayload.safeParse(row).success))
+        throw new HenrikApiError("Invalid match history fields", envelope.status, "invalid-payload");
+      const page = envelope.data;
+      rows.push(...page.slice(0, pageSize));
       if (page.length < pageSize) break;
     }
     return rows.slice(0, targetSize);
@@ -119,70 +138,39 @@ export class HenrikClient {
     const envelope = await this.get<unknown>(
       `/valorant/v4/match/${encodeURIComponent(region)}/${encodeURIComponent(matchId)}`,
     );
+    if (envelope.data !== null && !matchPayload.safeParse(envelope.data).success)
+      throw new HenrikApiError("Invalid match fields", envelope.status, "invalid-payload");
     return envelope.data ?? null;
   }
 
+  async getMmrHistoryByPuuid(region: string, platform: string, puuid: string): Promise<unknown> {
+    return (
+      await this.get(
+        `/valorant/v2/by-puuid/mmr-history/${encodeURIComponent(region)}/${encodeURIComponent(platform)}/${encodeURIComponent(puuid)}`,
+      )
+    ).data;
+  }
+
+  async getWebsite(locale: string): Promise<unknown> {
+    return (await this.get(`/valorant/v1/website/${encodeURIComponent(locale.toLowerCase())}`)).data;
+  }
+  async getWebsiteEntry(locale: string, id: string): Promise<unknown> {
+    return (
+      await this.get(`/valorant/v1/website/${encodeURIComponent(locale.toLowerCase())}/${encodeURIComponent(id)}`)
+    ).data;
+  }
+
   private async get<T>(path: string): Promise<HenrikEnvelope<T>> {
-    await this.throttle();
-    let response: Response;
     try {
-      response = await this.fetchImpl(`${this.baseUrl}${path}`, {
-        headers: { Authorization: this.apiKey },
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-    } catch {
-      throw new HenrikApiError("Henrik request timed out or was unavailable", null, "unavailable");
+      return (await this.transport.json(
+        `${this.baseUrl}${path}`,
+        { Authorization: this.apiKey },
+        true,
+      )) as HenrikEnvelope<T>;
+    } catch (error) {
+      if (error instanceof ProviderTransportError)
+        throw new HenrikApiError("Henrik request failed", error.status, error.code, error.retryAt);
+      throw error;
     }
-
-    let body: HenrikEnvelope<T>;
-    try {
-      body = (await response.json()) as HenrikEnvelope<T>;
-    } catch {
-      throw new HenrikApiError("Henrik returned a non-JSON response", response.status, "invalid-payload");
-    }
-    if (!response.ok || body.status >= 400) {
-      const message =
-        body.errors
-          ?.map((error) => error.message)
-          .filter(Boolean)
-          .join("; ") || "Henrik request failed";
-      throw new HenrikApiError(
-        message,
-        response.status,
-        classify(response.status),
-        response.status === 429 ? retryAt(response) : null,
-      );
-    }
-    return body;
   }
-
-  private async throttle(): Promise<void> {
-    const intervalMs = Math.ceil(60_000 / this.requestsPerMinute);
-    const turn = this.throttleChain.then(async () => {
-      const waitMs = Math.max(0, this.nextRequestAt - Date.now());
-      if (waitMs) await Bun.sleep(waitMs);
-      this.nextRequestAt = Date.now() + intervalMs;
-    });
-    this.throttleChain = turn.catch(() => undefined);
-    await turn;
-  }
-}
-
-function classify(status: number): HenrikFailureCode {
-  if (status === 401 || status === 403) return "unauthorized";
-  if (status === 404) return "not-found";
-  if (status === 429) return "rate-limited";
-  if (status >= 500) return "upstream-failure";
-  return "invalid-payload";
-}
-
-function retryAt(response: Response): string {
-  const raw = response.headers.get("retry-after")?.trim();
-  if (raw) {
-    const seconds = Number(raw);
-    if (Number.isFinite(seconds) && seconds >= 0) return new Date(Date.now() + seconds * 1_000).toISOString();
-    const parsed = Date.parse(raw);
-    if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
-  }
-  return new Date((Math.floor(Date.now() / 60_000) + 1) * 60_000 + 1_000).toISOString();
 }

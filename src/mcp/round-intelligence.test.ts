@@ -119,17 +119,17 @@ describe("round intelligence", () => {
       rounds: 2,
       wins: 1,
       losses: 1,
-      focusKills: 0,
-      focusDeaths: 1,
-      openingDeaths: 1,
-      untradedDeaths: 0,
+      focusKills: null,
+      focusDeaths: null,
+      openingDeaths: null,
+      untradedDeaths: null,
     });
     expect(timeline.rounds[1]).toMatchObject({
       roundNumber: 2,
       scoreBefore: "1-0",
       scoreAfter: "1-1",
       outcome: "loss",
-      opening: { id: "r2-kill-0" },
+      opening: "r2-kill-0",
     });
     expect(timeline.rounds[1]!.observedFacts.length).toBeGreaterThan(0);
     expect(timeline.limitations.join(" ")).toContain("continuous POV");

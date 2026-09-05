@@ -1,3 +1,4 @@
+import { losesEvidence } from "../services/match-completeness";
 import { Database } from "bun:sqlite";
 import { query, transaction } from "./query";
 
@@ -150,17 +151,21 @@ export class SqliteMatchCache implements MatchCache {
     return transaction(this.db, () => {
       const existing = query(
         this.db,
-        `SELECT payload_hash, completeness_score, first_saved_at, source_endpoint
+        `SELECT payload_hash, completeness_score, first_saved_at, source_endpoint, base_projection_json
          FROM cached_matches WHERE match_id = ? AND platform = ? LIMIT 1`,
       ).get(input.matchId, input.platform) as {
         payload_hash: string;
         completeness_score: number;
         first_saved_at: string;
         source_endpoint: string;
+        base_projection_json: string | null;
       } | null;
       const existingIsRicher =
         existing &&
-        (existing.completeness_score > score ||
+        ((existing.payload_hash !== payloadHash &&
+          existing.base_projection_json !== null &&
+          losesEvidence(JSON.parse(existing.base_projection_json) as MatchDetail, input.baseProjection)) ||
+          existing.completeness_score > score ||
           (existing.completeness_score === score &&
             existing.source_endpoint === "match-detail-v4" &&
             input.sourceEndpoint === "recent-list-v4"));

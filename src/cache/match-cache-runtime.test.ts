@@ -1,3 +1,4 @@
+import { completeProviderMatch } from "../../evals/fixtures/complete-provider";
 import { providerMatch } from "../../evals/fixtures/provider";
 import { expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -10,7 +11,7 @@ import { SqliteMatchCache } from "./sqlite-match-cache";
 
 test("recent lists persist nothing and only the selected complete match becomes durable", async () => {
   await withCache(async ({ cache, path }) => {
-    const provider = fakeProvider();
+    const provider = fakeProvider({ completeList: true });
     const runtime = new ValorantRuntime(provider, cache);
     const listed = await runtime.listMatches({ player: "Focus#EU", region: "eu", platform: "pc", limit: 20 });
     expect(listed.matches).toHaveLength(1);
@@ -124,7 +125,7 @@ test("a cache write failure keeps live analysis usable and returns a visible war
   expect(provider.calls.detail).toBe(1);
 });
 
-function fakeProvider(options: { partialList?: boolean; failDetail?: boolean } = {}) {
+function fakeProvider(options: { partialList?: boolean; failDetail?: boolean; completeList?: boolean } = {}) {
   const calls = { detail: 0, list: 0 };
   return {
     calls,
@@ -139,7 +140,13 @@ function fakeProvider(options: { partialList?: boolean; failDetail?: boolean } =
     },
     async getMatchesByPuuid() {
       calls.list += 1;
-      return [options.partialList ? partialProviderMatch("cache-match-1") : providerMatch("cache-match-1")];
+      return [
+        options.partialList
+          ? partialProviderMatch("cache-match-1")
+          : options.completeList
+            ? completeProviderMatch("cache-match-1")
+            : providerMatch("cache-match-1"),
+      ];
     },
     async getMatch(_region: string, _platform: string, matchId: string) {
       calls.detail += 1;

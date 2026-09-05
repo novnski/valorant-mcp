@@ -73,12 +73,12 @@ describe("RoundAnalysisService", () => {
     );
   });
 
-  test("handles zero-based event rounds and overtime without shifting an exact round", () => {
+  test("uses one zero-based indexing convention through overtime", () => {
     const match = baseMatch({
       rounds: [round(1, "Blue", []), round(25, "Red", [])],
       killEvents: [
         kill(0, 5_000, "focus", "Focus", "Blue", "red-1", "RedOne", "Red"),
-        kill(25, 6_000, "red-1", "RedOne", "Red", "focus", "Focus", "Blue"),
+        kill(24, 6_000, "red-1", "RedOne", "Red", "focus", "Focus", "Blue"),
       ],
     });
     const analysis = new RoundAnalysisService().analyze(match, null);

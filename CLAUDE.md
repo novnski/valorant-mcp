@@ -4,7 +4,7 @@ This repository is a local TypeScript MCP server exposed to MCP clients over std
 
 ## Product boundary
 
-- Henrik is the only live match data API. The Strats.gg open public JSON API (`api.strats.gg/internal/api/v1`) is the only other live source and is used solely by the read-only lineup tools `valorant_search_lineups` and `valorant_get_lineup`; it needs no key.
+- Henrik is the only live match data API and provides patch-news discovery. The Strats.gg open public JSON API (`api.strats.gg/internal/api/v1`) is used solely by the read-only lineup tools `valorant_search_lineups` and `valorant_get_lineup`; it needs no key. Valorant-API public metadata and `media.valorant-api.com` assets are allowed only for explicit game-content/asset requests and maintainer-driven content builds. Canonical Riot public patch-publication metadata may be bundled as an offline fallback; no news crawler or background ingestion is allowed.
 - Player input is always explicit and may be a Riot ID, PUUID, or full Tracker.gg Valorant profile URL. Match inputs may be Henrik IDs or Tracker.gg match URLs. Decode Tracker links locally; never scrape or call Tracker at runtime, and never introduce a default or linked profile.
 - Keep tools read-only and post-match. Do not add live scouting, hidden-player identification, Riot session/cookie handling, or private client APIs.
 - Recent player/rank/match-list reads stay live and non-persistent. Persist one match only when a detail-dependent tool explicitly opens that exact match ID; never crawl, backfill, expand participants, or persist the rest of a recent list.

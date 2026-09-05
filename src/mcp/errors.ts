@@ -1,5 +1,6 @@
 import { MatchCacheError } from "../cache/match-cache";
 import { HenrikApiError } from "./henrik-client";
+import { ProviderTransportError } from "./provider-transport";
 import { StratsApiError } from "./strats-client";
 
 /** Deliberately safe, actionable feedback about a user's selection. */
@@ -11,7 +12,10 @@ export class ValorantInputError extends Error {
 }
 
 export function actionableError(error: unknown): string {
+  if (error instanceof DOMException && error.name === "AbortError")
+    return "The request was cancelled. No queued provider request will start for this cancelled operation.";
   if (error instanceof HenrikApiError) {
+    if (error.code === "cancelled") return "The Henrik request was cancelled.";
     if (error.code === "invalid-config")
       return "HENRIK_REQUESTS_PER_MINUTE must be an integer between 1 and 300. Correct it in your server environment and restart the client.";
     if (error.code === "missing-config")
@@ -25,9 +29,18 @@ export function actionableError(error: unknown): string {
     return `Henrik request failed (${error.code}). Verify the player identifier, shard, platform, and API availability.`;
   }
   if (error instanceof StratsApiError) {
+    if (error.code === "cancelled") return "The lineup request was cancelled.";
+    if (error.code === "rate-limited")
+      return `Strats.gg rate limit reached. Retry after ${error.retryAt ?? "the cooldown"}.`;
     if (error.code === "not-found")
       return "Strats.gg could not find that lineup, map source, or character. Verify the lineup id and map/agent names.";
     return "The Strats.gg lineup API is unavailable. Verify the lineup id and try again later.";
+  }
+  if (error instanceof ProviderTransportError) {
+    if (error.code === "cancelled") return "The public content request was cancelled.";
+    if (error.code === "rate-limited")
+      return `Public content rate limit reached. Retry after ${error.retryAt ?? "the cooldown"}.`;
+    return "Public content is unavailable or invalid. Retry later, or set fresh=false for bundled content.";
   }
   if (error instanceof MatchCacheError)
     return "The local match cache could not be read or written. Check available disk space and permissions, or set VALORANT_MATCH_CACHE_PATH to a writable file path.";

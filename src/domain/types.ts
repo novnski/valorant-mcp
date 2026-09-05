@@ -20,7 +20,8 @@ export type RankSnapshot = {
   peakSeasonId?: string | null;
   peakSeasonShort?: string | null;
   leaderboardPlacement: number | null;
-  updatedAt: string;
+  updatedAt: string | null;
+  fetchedAt?: string;
 };
 
 export type MatchRankChange = {
@@ -430,6 +431,9 @@ export type MatchRoundEvidenceAnalysis = {
 };
 
 export type MatchDetail = {
+  /** Henrik v4 kill rounds are zero-based even when round zero has no kill. */
+  killRoundOffset?: 0 | 1;
+  evidence?: import("../services/match-completeness").MatchCompleteness;
   matchId: string;
   region: string;
   platform: string;

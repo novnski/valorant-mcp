@@ -45,7 +45,10 @@ describe("HenrikClient", () => {
       calls += 1;
       const url = new URL(String(input));
       const start = Number(url.searchParams.get("start"));
-      return Response.json({ status: 200, data: Array.from({ length: 10 }, (_, index) => ({ id: start + index })) });
+      return Response.json({
+        status: 200,
+        data: Array.from({ length: 10 }, (_, index) => ({ metadata: { match_id: `test-match-${start + index}` } })),
+      });
     });
 
     const rows = await client.getMatchesByPuuid("eu", "pc", "p", 99);

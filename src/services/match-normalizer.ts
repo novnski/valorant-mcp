@@ -26,7 +26,7 @@ export function normalizeMatches(
       stringAt(raw, ["match_id"]) ??
       stringAt(raw, ["matchId"]);
 
-    if (!matchId) {
+    if (!matchId || rawByMatchId.has(matchId)) {
       continue;
     }
 

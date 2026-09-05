@@ -148,7 +148,7 @@ describe("normalizeMatchDetail", () => {
       durationMs: 800_000,
       endState: { kind: "completed", label: "Completed", evidence: "team-result" },
       source: "live",
-      warnings: [],
+      evidence: { roster: { state: "partial" }, kills: { state: "partial" } },
     });
     expect(detail?.teams).toHaveLength(2);
     /* One vocabulary for the two sides: the provider names them Red and Blue and
@@ -296,7 +296,7 @@ describe("normalizeMatchDetail", () => {
     );
 
     expect(detail?.source).toBe("cache");
-    expect(detail?.warnings).toHaveLength(1);
+    expect(detail?.warnings.join(" ")).toContain("roster evidence is partial");
     expect(detail?.teams.find((team) => team.teamId === "blue")?.players).toHaveLength(1);
   });
 

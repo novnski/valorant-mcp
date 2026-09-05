@@ -1,10 +1,27 @@
 {
-  "version": 1,
-  "generatedAt": "2026-08-24T22:38:59.774Z",
+  "version": 2,
+  "generatedAt": "2026-09-05T22:45:23.270Z",
+  "locale": "en-US",
+  "contentVersion": {
+    "manifestId": "3A0EBC92259BF798",
+    "branch": "release-13.05",
+    "version": "13.05.00.5350494",
+    "buildVersion": "11",
+    "engineVersion": "5.3.2.0",
+    "riotClientVersion": "release-13.05-shipping-11-5350494",
+    "riotClientBuild": "111.0.0.3261.5663",
+    "buildDate": "2026-08-20T23:51:14Z"
+  },
   "agents": [
     {
       "uuid": "41fb69c1-4189-7b37-f117-bcaf1e96f1bf",
       "name": "Astra",
+      "aliases": [
+        "Astra"
+      ],
+      "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "Ghanaian Agent Astra harnesses the energies of the cosmos to reshape battlefields to her whim. With full command of her astral form and a talent for deep strategic foresight, she's always eons ahead of her enemy's next move.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -12,26 +29,31 @@
         {
           "slot": "Ability1",
           "name": "Nova Pulse",
+          "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ability1/displayicon.png",
           "description": "Place Stars in Astral Form (Ultimate Key).\r\n\r\nACTIVATE a Star to detonate a Nova Pulse. The Nova Pulse charges briefly then strikes, Concussing all players in its area."
         },
         {
           "slot": "Ability2",
           "name": "Nebula  / Dissipate",
+          "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ability2/displayicon.png",
           "description": "Place Stars in Astral Form (Ultimate Key). \r\n\r\nACTIVATE a Star to transform it into a Nebula (smoke).\r\n\r\nUSE a Star to Dissipate it, returning the Star to be placed in a new location after a delay.\r\n\r\nDissipate briefly forms a fake Nebula at the Star's location before returning."
         },
         {
           "slot": "Grenade",
           "name": "Gravity Well",
+          "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/grenade/displayicon.png",
           "description": "Place Stars in Astral Form (Ultimate Key).\r\n\r\nACTIVATE a Star to form a Gravity Well. Players in the area are pulled toward the center before it explodes, making all players still trapped inside Vulnerable."
         },
         {
           "slot": "Ultimate",
           "name": "Astral Form / Cosmic Divide",
+          "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/ultimate/displayicon.png",
           "description": "ACTIVATE to enter Astral Form where you can place Stars with FIRE. Stars can be reactivated later, transforming them into a Nova Pulse, Nebula, or Gravity Well.\r\n\r\nWhen Cosmic Divide is charged, use ALT FIRE in Astral Form to begin aiming it, then FIRE to select two locations. An infinite Cosmic Divide connects the two points you select. Cosmic Divide blocks bullets and sound."
         },
         {
           "slot": "Passive",
           "name": "Astral Form",
+          "icon": "https://media.valorant-api.com/agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf/abilities/passive/displayicon.png",
           "description": "ACTIVATE Ultimate to enter Astral Form and PRIMARY FIRE to place Stars. Target Stars with your Nova Pulse, Nebula, or Gravity Well to use those abilities."
         }
       ]
@@ -39,6 +61,12 @@
     {
       "uuid": "5f8d3a7f-467b-97f3-062c-13acf203c006",
       "name": "Breach",
+      "aliases": [
+        "Breach"
+      ],
+      "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "The bionic Swede Breach fires powerful, targeted kinetic blasts to aggressively clear a path through enemy ground. The damage and disruption he inflicts ensures no fight is ever fair.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -46,21 +74,25 @@
         {
           "slot": "Ability1",
           "name": "Flashpoint",
+          "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ability1/displayicon.png",
           "description": "EQUIP a Blinding charge. FIRE the charge to set a fast-acting burst through the wall. The charge detonates to Blind all players looking at it."
         },
         {
           "slot": "Ability2",
           "name": "Fault Line",
+          "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ability2/displayicon.png",
           "description": "EQUIP a Seismic Blast. HOLD FIRE to increase the distance. RELEASE to set off the quake, Concussing all players in its zone and in a line up to the zone."
         },
         {
           "slot": "Grenade",
           "name": "Aftershock",
+          "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/grenade/displayicon.png",
           "description": "EQUIP a fusion charge. FIRE the charge to set a slow-acting burst through the wall. The burst does heavy damage to anyone caught in its area."
         },
         {
           "slot": "Ultimate",
           "name": "Rolling Thunder",
+          "icon": "https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-13acf203c006/abilities/ultimate/displayicon.png",
           "description": "EQUIP a Seismic Charge. FIRE to send a cascading quake through all terrain in a large zone. The quake Concusses and knocks up anyone caught in it."
         }
       ]
@@ -68,6 +100,12 @@
     {
       "uuid": "9f0d8ba9-4140-b941-57d3-a7ad57c6b417",
       "name": "Brimstone",
+      "aliases": [
+        "Brimstone"
+      ],
+      "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "Joining from the U.S.A., Brimstone's orbital arsenal ensures his squad always has the advantage. His ability to deliver utility precisely and safely make him the unmatched boots-on-the-ground commander.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -75,21 +113,25 @@
         {
           "slot": "Grenade",
           "name": "Stim Beacon",
+          "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/grenade/displayicon.png",
           "description": "INSTANTLY toss down a stim beacon. Upon landing, it creates a field that grants players a Combat Stim and a Speed Boost."
         },
         {
           "slot": "Ability1",
           "name": "Incendiary",
+          "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ability1/displayicon.png",
           "description": "EQUIP an incendiary grenade launcher. FIRE to launch a grenade that detonates as it comes to a rest on the floor, creating a lingering fire zone that damages players within the zone."
         },
         {
           "slot": "Ability2",
           "name": "Sky Smoke",
+          "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ability2/displayicon.png",
           "description": "EQUIP a tactical map. FIRE to set locations where Brimstone's smoke clouds will land. ALT FIRE to confirm, launching long-lasting smoke clouds that block vision in the selected area."
         },
         {
           "slot": "Ultimate",
           "name": "Orbital Strike",
+          "icon": "https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/abilities/ultimate/displayicon.png",
           "description": "EQUIP a tactical map. FIRE to launch a lingering orbital strike laser at the selected location, dealing high damage-over-time to players caught in the selected area."
         }
       ]
@@ -97,6 +139,12 @@
     {
       "uuid": "22697a3d-45bf-8dd7-4fec-84a9e28c69d7",
       "name": "Chamber",
+      "aliases": [
+        "Chamber"
+      ],
+      "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "Well-dressed and well-armed, French weapons designer Chamber expels aggressors with deadly precision. He leverages his custom arsenal to hold the line and pick off enemies from afar, with a contingency built for every plan.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -104,21 +152,25 @@
         {
           "slot": "Ability2",
           "name": "Rendezvous",
+          "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ability2/displayicon.png",
           "description": "EQUIP a teleport anchor. FIRE to place it on the ground. While on the ground and in range of the anchor, REACTIVATE to quickly teleport to the anchor. The anchor can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Grenade",
           "name": "Trademark",
+          "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/grenade/displayicon.png",
           "description": "EQUIP a trap that scans for enemies. FIRE to place it on the ground. When a visible enemy comes in range, the trap counts down and then destabilizes the terrain around them, creating a lingering field that Slows players caught inside of it. The trap can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Ability1",
           "name": "Headhunter",
+          "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ability1/displayicon.png",
           "description": "ACTIVATE to equip a heavy pistol. ALT FIRE with the pistol equipped to aim down sights."
         },
         {
           "slot": "Ultimate",
           "name": "Tour De Force",
+          "icon": "https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/abilities/ultimate/displayicon.png",
           "description": "ACTIVATE to summon a powerful, custom sniper rifle that will kill an enemy with any direct hit to the upper body. ALT FIRE to aim down sights. Killing an enemy creates a lingering field that Slows players caught inside of it."
         }
       ]
@@ -126,6 +178,12 @@
     {
       "uuid": "1dbf2edd-4729-0984-3115-daa5eed44993",
       "name": "Clove",
+      "aliases": [
+        "Clove"
+      ],
+      "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "Scottish troublemaker Clove makes mischief for enemies in both the heat of combat and the cold of death. The young immortal keeps foes guessing, even from beyond the grave, their return to the living only ever a moment away.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -133,21 +191,25 @@
         {
           "slot": "Grenade",
           "name": "Pick-me-up",
+          "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/grenade/displayicon.png",
           "description": "ACTIVATE to absorb the life force of a fallen enemy that Clove damaged or killed, gaining haste and temporary health."
         },
         {
           "slot": "Ability2",
           "name": "Ruse",
+          "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ability2/displayicon.png",
           "description": "EQUIP a view of the battlefield. FIRE to set the locations where Clove’s clouds will settle. ALT FIRE to confirm, launching clouds that block vision in the chosen areas. Clove can use this ability after death."
         },
         {
           "slot": "Ultimate",
           "name": "Not Dead Yet",
+          "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ultimate/displayicon.png",
           "description": "After dying, ACTIVATE to resurrect. Once resurrected, Clove must earn a kill or a damaging assist within a set time or they will die. REACTIVATE to cancel early."
         },
         {
           "slot": "Ability1",
           "name": "Meddle",
+          "icon": "https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/abilities/ability1/displayicon.png",
           "description": "EQUIP a fragment of immortality essence. FIRE to throw the fragment, which upon landing on the floor, erupts after a short delay and temporarily Decays all targets caught inside."
         }
       ]
@@ -155,6 +217,12 @@
     {
       "uuid": "117ed9e3-49f3-6512-3ccf-0cada7e3823b",
       "name": "Cypher",
+      "aliases": [
+        "Cypher"
+      ],
+      "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "The Moroccan information broker, Cypher is a one-man surveillance network who keeps tabs on the enemy's every move. No secret is safe. No maneuver goes unseen. Cypher is always watching.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -162,21 +230,25 @@
         {
           "slot": "Ability1",
           "name": "Cyber Cage",
+          "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ability1/displayicon.png",
           "description": "INSTANTLY toss the cyber cage in front of Cypher. ACTIVATE to create a zone that blocks vision and plays an audio cue when enemies pass through it."
         },
         {
           "slot": "Ability2",
           "name": "Spycam",
+          "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ability2/displayicon.png",
           "description": "EQUIP a spycam. FIRE to place the spycam at the targeted location. RE-USE this ability to take control of the camera's view. While in control of the camera, FIRE to shoot a marking dart. This dart will Reveal the location of any player struck by the dart. This ability can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Grenade",
           "name": "Trapwire",
+          "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/grenade/displayicon.png",
           "description": "EQUIP a trapwire. FIRE to place a destructible and covert trapwire at the targeted location, creating a line that spans between the placed location and the wall opposite. Enemy players who cross a trapwire will be Slowed and Revealed after a short period if they do not destroy the device in time. This ability can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Ultimate",
           "name": "Neural Theft",
+          "icon": "https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/abilities/ultimate/displayicon.png",
           "description": "INSTANTLY use on a targeted dead enemy to download information on their team.  After a brief delay, the location of all living enemy players will be Revealed twice."
         }
       ]
@@ -184,6 +256,12 @@
     {
       "uuid": "cc8b64c8-4b25-4ff9-6e7f-37b4da43d235",
       "name": "Deadlock",
+      "aliases": [
+        "Deadlock"
+      ],
+      "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "Norwegian operative Deadlock deploys an array of cutting-edge nanowire to secure the battlefield from even the most lethal assault. No one escapes her vigilant watch, nor survives her unyielding ferocity.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -191,21 +269,25 @@
         {
           "slot": "Ability1",
           "name": "Sonic Sensor",
+          "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ability1/displayicon.png",
           "description": "EQUIP a Sonic Sensor. FIRE to deploy. The sensor monitors an area for enemies making sound. It concusses that area if footsteps, weapons fire, or significant noise are detected. This ability can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Grenade",
           "name": "Barrier Mesh",
+          "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/grenade/displayicon.png",
           "description": "EQUIP a Barrier Mesh disc. FIRE to throw forward. Upon landing, the disc generates barriers from the origin point that block character movement."
         },
         {
           "slot": "Ability2",
           "name": "GravNet",
+          "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ability2/displayicon.png",
           "description": "EQUIP a GravNet grenade. FIRE to throw. ALT FIRE to lob. The GravNet detonates upon landing, forcing any characters caught within to crouch and move slowly."
         },
         {
           "slot": "Ultimate",
           "name": "Annihilation",
+          "icon": "https://media.valorant-api.com/agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235/abilities/ultimate/displayicon.png",
           "description": "EQUIP a Nanowire Accelerator. FIRE to unleash a pulse of nanowires that captures the first enemy contacted. The cocooned enemy is pulled along a nanowire path and will die unless they are freed. The nanowire cocoon is destructible."
         }
       ]
@@ -213,6 +295,12 @@
     {
       "uuid": "dade69b4-4f5a-8528-247b-219e5a1facd6",
       "name": "Fade",
+      "aliases": [
+        "Fade"
+      ],
+      "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "Turkish bounty hunter Fade unleashes the power of raw nightmare to seize enemy secrets. Attuned with terror itself, she hunts down targets and reveals their deepest fears - before crushing them in the dark.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -220,21 +308,25 @@
         {
           "slot": "Ability1",
           "name": "Seize",
+          "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ability1/displayicon.png",
           "description": "EQUIP a knot of raw fear. FIRE to throw. The knot drops down after a set time. RE-USE to drop the knot early. The knot ruptures on impact, holding nearby enemies in place. Held enemies are Deafened, and Decayed."
         },
         {
           "slot": "Ability2",
           "name": "Haunt",
+          "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ability2/displayicon.png",
           "description": "EQUIP a haunting watcher. FIRE to throw. The watcher drops down after a set time. RE-USE to drop the watcher early. The watcher lashes out on impact, Revealing enemies in its line of sight and creating terror trails to them. Enemies can destroy the watcher."
         },
         {
           "slot": "Grenade",
           "name": "Prowler",
+          "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/grenade/displayicon.png",
           "description": "EQUIP a prowler. FIRE to send the prowler forward. HOLD FIRE to steer the prowler towards your crosshair. The prowler will chase down the first enemy or terror trail it sees, and Nearsight the enemy on impact."
         },
         {
           "slot": "Ultimate",
           "name": "Nightfall",
+          "icon": "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/abilities/ultimate/displayicon.png",
           "description": "EQUIP the power of nightmare itself. FIRE to unleash a wave of unstoppable nightmare energy. Enemies caught in the wave are Marked by terror trails, Deafened, and Decayed."
         }
       ]
@@ -242,6 +334,12 @@
     {
       "uuid": "e370fa57-4757-3604-3648-499e1f642d3f",
       "name": "Gekko",
+      "aliases": [
+        "Gekko"
+      ],
+      "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "Gekko the Angeleno leads a tight-knit crew of calamitous creatures. His buddies bound forward, scattering enemies out of the way, with Gekko chasing them down to regroup and go again.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -249,21 +347,25 @@
         {
           "slot": "Ability1",
           "name": "Wingman",
+          "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ability1/displayicon.png",
           "description": "EQUIP Wingman. FIRE to send Wingman forward seeking enemies. Wingman unleashes a concussive blast toward the first enemy he sees. ALT FIRE when targeting a Spike site or planted Spike to have Wingman defuse or plant the Spike. To plant, Gekko must have the Spike in his inventory. When Wingman expires he reverts into a dormant globule. INTERACT to reclaim the globule and gain another Wingman charge after a short cooldown."
         },
         {
           "slot": "Ability2",
           "name": "Dizzy",
+          "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ability2/displayicon.png",
           "description": "EQUIP Dizzy. FIRE to send Dizzy soaring forward through the air. Dizzy charges then unleashes plasma blasts at enemies in line of sight. Enemies hit by her plasma are Blinded. When Dizzy expires she reverts into a dormant globule. INTERACT to reclaim the globule and gain another Dizzy charge after a short cooldown."
         },
         {
           "slot": "Grenade",
           "name": "Mosh Pit",
+          "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/grenade/displayicon.png",
           "description": "EQUIP Mosh. FIRE to throw Mosh like a grenade. ALT FIRE to lob. Upon landing Mosh duplicates across a large area that deals a small amount of damage over time then after a short delay explodes. INTERACT to reclaim the globule and gain another Mosh charge after a short cooldown."
         },
         {
           "slot": "Ultimate",
           "name": "Thrash",
+          "icon": "https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/abilities/ultimate/displayicon.png",
           "description": "EQUIP Thrash. FIRE to link with Thrash’s mind and steer her through enemy territory. ACTIVATE to lunge forward and explode, Detaining any players in a small radius. When Thrash expires she reverts into a dormant globule. INTERACT to reclaim the globule and gain another Thrash charge after a short cooldown. Thrash can be reclaimed once."
         }
       ]
@@ -271,6 +373,12 @@
     {
       "uuid": "95b78ed7-4637-86d9-7e41-71ba8c293152",
       "name": "Harbor",
+      "aliases": [
+        "Harbor"
+      ],
+      "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "Hailing from India’s coast, Harbor storms the field wielding ancient technology with dominion over water. He unleashes frothing rapids and crushing waves to shield his allies, or pummel those that oppose him.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -278,21 +386,25 @@
         {
           "slot": "Ability1",
           "name": "High Tide",
+          "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ability1/displayicon.png",
           "description": "EQUIP High Tide. FIRE to send water forward along the ground. HOLD FIRE to guide the water towards your crosshair spawning a vision blocking Screen along the path. ALT FIRE to stop the water early. All players crossing High Tide are Slowed."
         },
         {
           "slot": "Grenade",
           "name": "Storm Surge",
+          "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/grenade/displayicon.png",
           "description": "EQUIP Storm Surge. FIRE to throw, creating an explosive whirlpool that Slows and Nearsights players within it after a short duration."
         },
         {
           "slot": "Ability2",
           "name": "Cove",
+          "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ability2/displayicon.png",
           "description": "EQUIP Cove. ACTIVATE to form a water Smoke in the select location. HOLD FIRE while targeting to move the marker further away and HOLD ALT FIRE to move it closer. RELOAD to toggle targeting view. REACTIVATE to Shield the water Smoke, blocking any bullets that hit it. The Shielded water Smoke can be destroyed."
         },
         {
           "slot": "Ultimate",
           "name": "Reckoning",
+          "icon": "https://media.valorant-api.com/agents/95b78ed7-4637-86d9-7e41-71ba8c293152/abilities/ultimate/displayicon.png",
           "description": "EQUIP Reckoning. FIRE to unleash the full power of your artifact, releasing a surge of water that barrels forward to Nearsight and Slow enemies that are hit."
         }
       ]
@@ -300,6 +412,12 @@
     {
       "uuid": "0e38b510-41a8-5780-5e8f-568b2a4f2d6c",
       "name": "Iso",
+      "aliases": [
+        "Iso"
+      ],
+      "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Chinese fixer for hire Iso falls into a flow state to dismantle the opposition. Reconfiguring ambient energy into bulletproof protection, he advances with focus towards his next duel to the death.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -307,21 +425,25 @@
         {
           "slot": "Ability1",
           "name": "Undercut",
+          "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ability1/displayicon.png",
           "description": "EQUIP a molecular bolt. FIRE to throw it forward, briefly applying Vulnerable & Suppress to all players it touches. The bolt can pass through solid objects, including walls."
         },
         {
           "slot": "Ultimate",
           "name": "Kill Contract",
+          "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ultimate/displayicon.png",
           "description": "EQUIP an interdimensional arena. FIRE to hurl a column of energy through the battlefield, pulling and healing both you and the first enemy hit into the arena to duel to the death."
         },
         {
           "slot": "Ability2",
           "name": "Double Tap",
+          "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/ability2/displayicon.png",
           "description": "INSTANTLY start channeling your focus. Once focused: gain a shield which absorbs one instance of damage from any source, reload more quickly, and enter a flow state during which downed enemies you kill or damage spawn an energy orb. Shooting this orb refreshes your flow state and your existing shield, or grants another."
         },
         {
           "slot": "Grenade",
           "name": "Contingency",
+          "icon": "https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/abilities/grenade/displayicon.png",
           "description": "EQUIP to assemble prismatic energy. FIRE to push an indestructible wall of energy forward that blocks bullets. ALT FIRE to push out a slower version of the wall."
         }
       ]
@@ -329,6 +451,12 @@
     {
       "uuid": "add6443a-41bd-e414-f6ad-e58d267f4e95",
       "name": "Jett",
+      "aliases": [
+        "Jett"
+      ],
+      "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Representing her home country of South Korea, Jett's agile and evasive fighting style lets her take risks no one else can. She runs circles around every skirmish, cutting enemies up before they even know what hit them.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -336,26 +464,31 @@
         {
           "slot": "Ability1",
           "name": "Updraft",
+          "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ability1/displayicon.png",
           "description": "INSTANTLY propel Jett high into the air."
         },
         {
           "slot": "Ability2",
           "name": "Tailwind",
+          "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ability2/displayicon.png",
           "description": "ACTIVATE to prepare a gust of wind for a limited time. RE-USE the wind to propel Jett in the direction she is moving. If Jett is standing still, she propels forward. Tailwind charge resets every two kills."
         },
         {
           "slot": "Grenade",
           "name": "Cloudburst",
+          "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/grenade/displayicon.png",
           "description": "INSTANTLY throw a projectile that expands into a brief vision-blocking cloud on impact with a surface. HOLD the ability key to curve the smoke in the direction of your crosshair."
         },
         {
           "slot": "Ultimate",
           "name": "Blade Storm",
+          "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/ultimate/displayicon.png",
           "description": "EQUIP a set of highly accurate throwing knives. FIRE to throw a single knife and recharge knives on a kill. ALT FIRE to throw all remaining daggers but does not recharge on a kill."
         },
         {
           "slot": "Passive",
           "name": "Drift",
+          "icon": "https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/abilities/passive/displayicon.png",
           "description": "Holding the jump button while falling allows you to glide through the air."
         }
       ]
@@ -363,6 +496,12 @@
     {
       "uuid": "601dbbe7-43ce-be57-2a40-4abd24953621",
       "name": "KAY/O",
+      "aliases": [
+        "KAY/O"
+      ],
+      "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "KAY/O is a machine of war built for a single purpose: neutralizing radiants. His power to Suppress enemy abilities dismantles his opponents' capacity to fight back, securing him and his allies the ultimate edge.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -370,21 +509,25 @@
         {
           "slot": "Grenade",
           "name": "FRAG/ment",
+          "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/grenade/displayicon.png",
           "description": "EQUIP an explosive fragment. FIRE to throw. ALT FIRE to lob. The fragment sticks to the floor and explodes multiple times, dealing near lethal damage at the center with each explosion."
         },
         {
           "slot": "Ability1",
           "name": "FLASH/drive",
+          "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ability1/displayicon.png",
           "description": "EQUIP a flash grenade. FIRE to overhand throw. ALT FIRE to lob a weaker version that explodes quickly. The flash grenade explodes after a short fuse, Blinding anyone in line of sight."
         },
         {
           "slot": "Ability2",
           "name": "ZERO/point",
+          "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ability2/displayicon.png",
           "description": "EQUIP a suppression blade. FIRE to throw. The blade sticks to the first surface it hits, winds up, and Suppresses anyone in the radius of the explosion. Enemies can destroy this blade."
         },
         {
           "slot": "Ultimate",
           "name": "NULL/cmd",
+          "icon": "https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/abilities/ultimate/displayicon.png",
           "description": "INSTANTLY overload with polarized radianite energy that pulses from KAY/O in a massive radius. Enemies hit with pulses are Suppressed for a short duration. While overloaded, KAY/O gains Combat Stim and can be re-stabilized if downed."
         }
       ]
@@ -392,6 +535,12 @@
     {
       "uuid": "1e58de9c-4950-5125-93e9-a0aee9f98746",
       "name": "Killjoy",
+      "aliases": [
+        "Killjoy"
+      ],
+      "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "The genius of Germany, Killjoy effortlessly secures key battlefield positions with her arsenal of inventions. If their damage doesn't take her enemies out, the debuff her robots provide will make short work of them.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -399,21 +548,25 @@
         {
           "slot": "Grenade",
           "name": "Nanoswarm",
+          "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/grenade/displayicon.png",
           "description": "EQUIP a Nanoswarm grenade. FIRE to throw the grenade. Upon landing, the Nanoswarm goes covert. ALT FIRE to lob. ACTIVATE the Nanoswarm to deploy a damaging swarm of nanobots."
         },
         {
           "slot": "Ability1",
           "name": "ALARMBOT",
+          "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ability1/displayicon.png",
           "description": "EQUIP a covert Alarmbot. FIRE to deploy a bot that hunts down enemies that get in range.  After reaching its target, the bot explodes and applies Vulnerable to enemies in the area. HOLD EQUIP to recall a deployed bot."
         },
         {
           "slot": "Ability2",
           "name": "TURRET",
+          "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ability2/displayicon.png",
           "description": "EQUIP a Turret. FIRE to deploy a turret that fires at enemies in a 100 degree cone. While targeting, EQUIP again to swap turret direction, HOLD ALT FIRE to rotate. HOLD EQUIP to recall the deployed turret."
         },
         {
           "slot": "Ultimate",
           "name": "Lockdown",
+          "icon": "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/abilities/ultimate/displayicon.png",
           "description": "EQUIP the Lockdown device. FIRE to deploy the device. After a long windup, the device Detains all enemies caught in the radius. The device can be destroyed by enemies."
         }
       ]
@@ -421,6 +574,12 @@
     {
       "uuid": "7c8a4701-4de6-9355-b254-e09bc2a34b72",
       "name": "Miks",
+      "aliases": [
+        "Miks"
+      ],
+      "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "Straight from Croatia, Miks takes the stage channeling pure sound energy. With his infectious passion and sonic powers, he rallies his squad to move as one as they set the tempo on the battlefield together.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -428,21 +587,25 @@
         {
           "slot": "Grenade",
           "name": "M-pulse",
+          "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/grenade/displayicon.png",
           "description": "EQUIP M-pulse. ALT-FIRE to toggle between Concuss and Healing outputs. FIRE to throw the device. Upon landing, M-pulse sends out sound waves, either Concussing or Healing players."
         },
         {
           "slot": "Ability2",
           "name": "Waveform",
+          "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ability2/displayicon.png",
           "description": "EQUIP a Map Targeter. FIRE to set locations. ALT-FIRE to spawn Smokes at selected locations."
         },
         {
           "slot": "Ability1",
           "name": "Harmonize",
+          "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ability1/displayicon.png",
           "description": "EQUIP Harmonize. Target an ally and FIRE to activate a Combat Stim and a speed boost on yourself and the ally that refreshes with each kill. ALT-FIRE to grant Combat Stim and speed boost to yourself."
         },
         {
           "slot": "Ultimate",
           "name": "Bassquake",
+          "icon": "https://media.valorant-api.com/agents/7c8a4701-4de6-9355-b254-e09bc2a34b72/abilities/ultimate/displayicon.png",
           "description": "EQUIP Bassquake. FIRE to build up and unleash Sonic Radiance forward, knocking back, Deafening, and Slowing players."
         }
       ]
@@ -450,6 +613,12 @@
     {
       "uuid": "bb2a4828-46eb-8cd1-e765-15848195d751",
       "name": "Neon",
+      "aliases": [
+        "Neon"
+      ],
+      "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Filipino Agent Neon surges forward at shocking speeds, discharging bursts of bioelectric radiance as fast as her body generates it. She races ahead to catch enemies off guard then strikes them down quicker than lightning.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -457,21 +626,25 @@
         {
           "slot": "Ability2",
           "name": "High Gear",
+          "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ability2/displayicon.png",
           "description": "INSTANTLY channel Neon’s power for Increased Speed. When charged, ALT FIRE to trigger an electric slide dash. Slide charge resets every two kills."
         },
         {
           "slot": "Ability1",
           "name": "Relay Bolt",
+          "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ability1/displayicon.png",
           "description": "INSTANTLY throw an energy bolt that bounces once. Upon hitting each surface, the bolt electrifies the ground below with a Concussive blast."
         },
         {
           "slot": "Grenade",
           "name": "Fast Lane",
+          "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/grenade/displayicon.png",
           "description": "FIRE two energy lines forward on the ground that extend a short distance or until they hit a surface. The lines rise into walls of static electricity that block vision."
         },
         {
           "slot": "Ultimate",
           "name": "Overdrive",
+          "icon": "https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/abilities/ultimate/displayicon.png",
           "description": "Unleash Neon’s full power and speed for a short duration, regaining all her fuel and a slide charge. FIRE to channel the power into a deadly lightning beam with high movement accuracy. Kills reset the duration of the effect."
         }
       ]
@@ -479,6 +652,12 @@
     {
       "uuid": "8e253930-4c05-31dd-1b6c-968525494517",
       "name": "Omen",
+      "aliases": [
+        "Omen"
+      ],
+      "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "A phantom of a memory, Omen hunts in the shadows. He renders enemies blind, teleports across the field, then lets paranoia take hold as his foe scrambles to uncover where he might strike next.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -486,21 +665,25 @@
         {
           "slot": "Ability1",
           "name": "Paranoia",
+          "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ability1/displayicon.png",
           "description": "EQUIP a blinding orb.  FIRE to throw it forward, briefly Nearsighting and Deafening all players it touches. This projectile can pass straight through walls."
         },
         {
           "slot": "Ability2",
           "name": "Dark Cover",
+          "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ability2/displayicon.png",
           "description": "EQUIP a shadow orb, entering a phased world to place and target the orbs. PRESS the ability key to throw the shadow orb to the marked location, creating a long-lasting shadow sphere that blocks vision. HOLD FIRE while targeting to move the marker further away. HOLD ALT FIRE while targeting to move the marker closer. PRESS RELOAD to toggle normal targeting view."
         },
         {
           "slot": "Grenade",
           "name": "Shrouded Step",
+          "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/grenade/displayicon.png",
           "description": "EQUIP a shrouded step ability and see its range indicator. FIRE to begin a brief channel, then teleport to the marked location."
         },
         {
           "slot": "Ultimate",
           "name": "From the Shadows",
+          "icon": "https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/abilities/ultimate/displayicon.png",
           "description": "EQUIP a tactical map. FIRE to begin teleporting to the selected location. While teleporting, Omen will appear as a Shade that can be destroyed by an enemy to cancel his teleport, or PRESS EQUIP for Omen to cancel his teleport."
         }
       ]
@@ -508,6 +691,12 @@
     {
       "uuid": "eb93336a-449b-9c1b-0a54-a891f7921d69",
       "name": "Phoenix",
+      "aliases": [
+        "Phoenix"
+      ],
+      "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Hailing from the U.K., Phoenix's star power shines through in his fighting style, igniting the battlefield with flash and flare. Whether he's got backup or not, he's rushing in to fight on his own terms.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -515,26 +704,31 @@
         {
           "slot": "Grenade",
           "name": "Blaze",
+          "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/grenade/displayicon.png",
           "description": "EQUIP a flame wall. FIRE to create a line of flame that moves forward, passing through the world and creating a wall of fire that blocks vision and damages players passing through it. The fire wall heals Phoenix instead of dealing damage. HOLD FIRE to bend the wall in the direction of your crosshair."
         },
         {
           "slot": "Ability1",
           "name": "Hot Hands",
+          "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ability1/displayicon.png",
           "description": "EQUIP a fireball. FIRE to throw a fireball that explodes after a set amount of time or upon hitting the ground, creating a lingering fire zone that damages enemies. The fire zone heals Phoenix instead of dealing damage. ALT FIRE to lob."
         },
         {
           "slot": "Ability2",
           "name": "Curveball",
+          "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ability2/displayicon.png",
           "description": "EQUIP a flare orb that takes a curving path and detonates shortly after throwing. FIRE to curve the flare orb to the left, detonating and Blinding any player who sees the orb. ALT FIRE to curve the flare orb to the right. Curveball resets a charge every two kills."
         },
         {
           "slot": "Ultimate",
           "name": "Run it Back",
+          "icon": "https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/abilities/ultimate/displayicon.png",
           "description": "INSTANTLY place a marker at Phoenix's location. While this ability is active, dying or allowing the timer to expire will end this ability and bring Phoenix back to this location with full health and the amount of armor he had when the ability was cast."
         },
         {
           "slot": "Passive",
           "name": "Heating Up",
+          "icon": null,
           "description": "PASSIVELY Heal Phoenix instead of taking damage after standing in Phoenix's own fire"
         }
       ]
@@ -542,6 +736,12 @@
     {
       "uuid": "f94c3b30-42be-e959-889c-5aa313dba261",
       "name": "Raze",
+      "aliases": [
+        "Raze"
+      ],
+      "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Raze explodes out of Brazil with her big personality and big guns. With her blunt-force-trauma playstyle, she excels at flushing entrenched enemies and clearing tight spaces with a generous dose of \"boom.\"",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -549,21 +749,25 @@
         {
           "slot": "Ability1",
           "name": "Blast Pack",
+          "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ability1/displayicon.png",
           "description": "INSTANTLY throw a Blast Pack that will stick to surfaces. RE-USE the ability after deployment to detonate, moving anything hit and dealing damage if fully armed."
         },
         {
           "slot": "Ability2",
           "name": "Paint Shells",
+          "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ability2/displayicon.png",
           "description": "EQUIP a cluster grenade. FIRE to throw the grenade, which does damage and creates sub-munitions, each doing damage to anyone in their range. ALT FIRE to lob. Paint Shells charge resets every two kills."
         },
         {
           "slot": "Grenade",
           "name": "Boom Bot",
+          "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/grenade/displayicon.png",
           "description": "EQUIP a Boom Bot. FIRE will deploy the bot, causing it to travel in a straight line on the ground, bouncing off walls. The Boom Bot will lock on to any enemies in its frontal cone and chase them, exploding for heavy damage if it reaches them."
         },
         {
           "slot": "Ultimate",
           "name": "Showstopper",
+          "icon": "https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/abilities/ultimate/displayicon.png",
           "description": "EQUIP a rocket launcher. FIRE to shoot a rocket that does massive area damage on contact with anything."
         }
       ]
@@ -571,6 +775,12 @@
     {
       "uuid": "a3bfb853-43b2-7238-a4f1-ad90e9e46bcc",
       "name": "Reyna",
+      "aliases": [
+        "Reyna"
+      ],
+      "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Forged in the heart of Mexico, Reyna dominates single combat, popping off with each kill she scores. Her capability is only limited by her raw skill, making her sharply dependent on performance.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -578,21 +788,25 @@
         {
           "slot": "Ability1",
           "name": "Devour",
+          "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ability1/displayicon.png",
           "description": "Soul Harvest: Enemies that die within 3 seconds of taking damage from Reyna leave behind Soul Orbs that last 3 seconds.\r\nDevour: INSTANTLY consume a soul orb, rapidly gaining Temporary Health. If EMPRESS is active then Devour automatically casts, does not consume the Soul Orb, and Healing is permanent."
         },
         {
           "slot": "Ability2",
           "name": "Dismiss",
+          "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ability2/displayicon.png",
           "description": "INSTANTLY consume a nearby Soul Orb, becoming Intangible for a short duration. If EMPRESS is active, also become Invisible."
         },
         {
           "slot": "Grenade",
           "name": "Leer",
+          "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/grenade/displayicon.png",
           "description": "EQUIP an ethereal, destructible eye. ACTIVATE to cast the eye a short distance forward. The eye will Nearsight all enemies who look at it."
         },
         {
           "slot": "Ultimate",
           "name": "Empress",
+          "icon": "https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/abilities/ultimate/displayicon.png",
           "description": "INSTANTLY enter a frenzy, gaining a Combat Stim that increases firing, equip and reload speed dramatically. Gain infinite charges of Soul Harvest abilities."
         }
       ]
@@ -600,6 +814,12 @@
     {
       "uuid": "569fdd95-4d10-43ab-ca70-79becc718b46",
       "name": "Sage",
+      "aliases": [
+        "Sage"
+      ],
+      "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "The bastion of China, Sage creates safety for herself and her team wherever she goes. Able to revive fallen friends and stave off forceful assaults, she provides a calm center to a hellish battlefield.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -607,21 +827,25 @@
         {
           "slot": "Ability1",
           "name": "Slow Orb",
+          "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ability1/displayicon.png",
           "description": "EQUIP a slowing orb. FIRE to throw a slowing orb forward that detonates upon landing, creating a lingering field that Slows and reduces the dash speed of players caught inside of it."
         },
         {
           "slot": "Ability2",
           "name": "Healing Orb",
+          "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ability2/displayicon.png",
           "description": "EQUIP a healing orb. FIRE with your crosshairs over a damaged ally to activate a Heal-Over-Time on them. ALT FIRE while Sage is damaged to activate a self Heal-Over-Time."
         },
         {
           "slot": "Grenade",
           "name": "Barrier Orb",
+          "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/grenade/displayicon.png",
           "description": "EQUIP a barrier orb. FIRE places a wall that fortifies after a few seconds. ALT FIRE rotates the targeter."
         },
         {
           "slot": "Ultimate",
           "name": "Resurrection",
+          "icon": "https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/abilities/ultimate/displayicon.png",
           "description": "EQUIP a resurrection ability. FIRE with your crosshairs placed over a dead ally to begin resurrecting them. After a brief channel, the ally will be brought back to life with full health."
         }
       ]
@@ -629,6 +853,12 @@
     {
       "uuid": "6f2a04ca-43e0-be17-7f36-b3908627744d",
       "name": "Skye",
+      "aliases": [
+        "Skye"
+      ],
+      "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "Hailing from Australia, Skye and her band of beasts trailblaze the way through hostile territory. With her creations hampering the enemy, and her power to heal others, the team is strongest and safest by Skye's side.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -636,21 +866,25 @@
         {
           "slot": "Ability1",
           "name": "Trailblazer",
+          "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ability1/displayicon.png",
           "description": "EQUIP a Tasmanian tiger trinket. FIRE to send out and take control of the predator. While in control, FIRE to leap forward, exploding in a Concussive blast on impact and damaging directly hit enemies."
         },
         {
           "slot": "Ability2",
           "name": "Guiding Light",
+          "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ability2/displayicon.png",
           "description": "EQUIP a hawk trinket. FIRE to send it forward. HOLD FIRE to guide the hawk in the direction of your crosshair. RE-USE while the hawk is in flight to transform it into a flash. The flash reaches max potency after a short duration during the hawk's flight."
         },
         {
           "slot": "Grenade",
           "name": "Regrowth",
+          "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/grenade/displayicon.png",
           "description": "EQUIP a healing trinket. HOLD FIRE to channel, Healing allies in range and line of sight. Can be reused until her healing pool is depleted. Skye cannot heal herself."
         },
         {
           "slot": "Ultimate",
           "name": "Seekers",
+          "icon": "https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/abilities/ultimate/displayicon.png",
           "description": "EQUIP a Seeker trinket. FIRE to send out three Seekers to track down the three closest enemies. If a Seeker reaches its target, it Nearsights and slows them. Enemies can destroy the Seekers."
         }
       ]
@@ -658,6 +892,12 @@
     {
       "uuid": "320b2a48-4d9b-a075-30f1-1f93a9b638fa",
       "name": "Sova",
+      "aliases": [
+        "Sova"
+      ],
+      "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "Born from the eternal winter of Russia's tundra, Sova tracks, finds, and eliminates enemies with ruthless efficiency and precision. His custom bow and incredible scouting abilities ensure that even if you run, you cannot hide.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -665,26 +905,31 @@
         {
           "slot": "Ability1",
           "name": "Shock Bolt",
+          "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ability1/displayicon.png",
           "description": "EQUIP a bow with a shock bolt. FIRE to send the explosive bolt forward, detonating upon collision and damaging players nearby. HOLD FIRE to extend the range of the projectile. ALT FIRE to add up to two bounces to this arrow."
         },
         {
           "slot": "Ability2",
           "name": "Recon Bolt",
+          "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ability2/displayicon.png",
           "description": "EQUIP a bow with recon bolt. FIRE to send the recon bolt forward, activating upon collision and Revealing the location of nearby enemies caught in the line of sight of the bolt. Enemies can destroy this bolt. HOLD FIRE to extend the range of the projectile. ALT FIRE to add up to two bounces to this arrow."
         },
         {
           "slot": "Grenade",
           "name": "Owl Drone",
+          "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/grenade/displayicon.png",
           "description": "EQUIP an owl drone. FIRE to deploy and take control of movement of the drone. While in control of the drone, FIRE to shoot a marking dart. This dart will Reveal the location of any player struck by the dart. Enemies can destroy the Owl Drone."
         },
         {
           "slot": "Ultimate",
           "name": "Hunter's Fury",
+          "icon": "https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/abilities/ultimate/displayicon.png",
           "description": "EQUIP a bow with three long-range, wall-piercing energy blasts. FIRE to release an energy blast in a line in front of Sova, dealing damage and Revealing the location of enemies caught in the line. This ability can be RE-USED up to two more times while the ability timer is active."
         },
         {
           "slot": "Passive",
           "name": "Uncanny Marksman",
+          "icon": null,
           "description": "Sova's custom bow can fire his arrows and bounce them off terrain. Holding fire charges the bow's power, and the bolt is loosed when released. Press alt fire to change the number of bounces.Your arrows can bounce off terrain. Holding left click increases the bow's range trajectory. Right clicking Toggle through the desired number of terrain bounces by right clicking. The arrow is loosed when left click is released."
         }
       ]
@@ -692,6 +937,12 @@
     {
       "uuid": "b444168c-4e35-8076-db47-ef9bf368f384",
       "name": "Tejo",
+      "aliases": [
+        "Tejo"
+      ],
+      "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/1b47567f-8f7b-444b-aae3-b0c634622d10/displayicon.png",
       "description": "A veteran intelligence consultant from Colombia, Tejo’s ballistic guidance system pressures the enemy to relinquish their ground - or their lives. His targeted strikes keep opponents off balance and under his heel.",
       "role": "Initiator",
       "roleDescription": "Initiators challenge angles by setting up their team to enter contested ground and push defenders away.",
@@ -699,21 +950,25 @@
         {
           "slot": "Ability2",
           "name": "Guided Salvo",
+          "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ability2/displayicon.png",
           "description": "EQUIP an AR targeting system. FIRE to select up to two target locations on the map. ALT FIRE to launch missiles that autonomously navigate to target locations, detonating repeatedly for damage on arrival."
         },
         {
           "slot": "Ability1",
           "name": "Special Delivery",
+          "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ability1/displayicon.png",
           "description": "EQUIP a sticky grenade. FIRE to launch. The grenade sticks to the first surface it hits and explodes, Concussing and dealing damage to any targets caught in the blast. ALT FIRE to launch the grenade with a single bounce instead."
         },
         {
           "slot": "Ultimate",
           "name": "Armageddon",
+          "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/ultimate/displayicon.png",
           "description": "EQUIP a tactical strike targeting map. FIRE to select the origin point of the strike. FIRE again to set the end point and launch the attack, unleashing a wave of lethal damaging explosions along the strike path. ALT FIRE during map targeting to cancel the origin point."
         },
         {
           "slot": "Grenade",
           "name": "Stealth Drone",
+          "icon": "https://media.valorant-api.com/agents/b444168c-4e35-8076-db47-ef9bf368f384/abilities/grenade/displayicon.png",
           "description": "EQUIP a stealth drone. FIRE to throw the drone forward, assuming direct control of its movement. FIRE again to trigger a pulse that Suppresses and Reveals enemies hit."
         }
       ]
@@ -721,6 +976,12 @@
     {
       "uuid": "92eeef5d-43b5-1d4a-8d03-b3927a09034b",
       "name": "Veto",
+      "aliases": [
+        "Veto"
+      ],
+      "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "Empowered by an unstoppable DNA mutation, Senegalese enforcer Veto defies the rules of engagement by nullifying his opponent's powers and technology. On Veto's battlefield, gunplay is your only guarantee.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -728,21 +989,25 @@
         {
           "slot": "Ability2",
           "name": "Interceptor",
+          "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ability2/displayicon.png",
           "description": "EQUIP the Interceptor. FIRE to place the Interceptor at projected location. Once placed, RE-USE to activate. Once active, it will destroy any utility that would BOUNCE off a player and/or be destroyed naturally by gunfire. Enemies can destroy the Interceptor."
         },
         {
           "slot": "Grenade",
           "name": "Crosscut",
+          "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/grenade/displayicon.png",
           "description": "EQUIP a vortex. FIRE to place on the ground. While in range and looking at the vortex, ACTIVATE to teleport to the vortex. During the BUY PHASE, the vortex can be reclaimed to be REDEPLOYED."
         },
         {
           "slot": "Ultimate",
           "name": "Evolution",
+          "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ultimate/displayicon.png",
           "description": "INSTANTLY begin to fully mutate, gaining a combat stim, regeneration, and becoming IMMUNE to all forms of debuffs."
         },
         {
           "slot": "Ability1",
           "name": "Chokehold",
+          "icon": "https://media.valorant-api.com/agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b/abilities/ability1/displayicon.png",
           "description": "EQUIP a viscous fragment of your mutation. FIRE to throw. The fragment deploys upon hitting the ground, creating a trap to hold enemies in place. Held enemies are Deafened, and Decayed. Enemies can destroy the trap before activation."
         }
       ]
@@ -750,6 +1015,12 @@
     {
       "uuid": "707eab51-4836-f488-046a-cda6bf494859",
       "name": "Viper",
+      "aliases": [
+        "Viper"
+      ],
+      "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/4ee40330-ecdd-4f2f-98a8-eb1243428373/displayicon.png",
       "description": "The American Chemist, Viper deploys an array of poisonous chemical devices to control the battlefield and choke the enemy's vision. If the toxins don't kill her prey, her mindgames surely will.",
       "role": "Controller",
       "roleDescription": "Controllers are experts in slicing up dangerous territory to set their team up for success.",
@@ -757,26 +1028,31 @@
         {
           "slot": "Ability1",
           "name": "Poison Cloud",
+          "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ability1/displayicon.png",
           "description": "EQUIP a gas emitter. FIRE to throw the emitter that perpetually remains throughout the round. ALT FIRE to lob. RE-USE the ability to create a toxic gas cloud that Decays opponents inside it at the cost of fuel. This ability can be picked up to be REDEPLOYED before the round starts and can be RE-USED more than once throughout the round."
         },
         {
           "slot": "Ability2",
           "name": "Toxic Screen",
+          "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ability2/displayicon.png",
           "description": "EQUIP a gas emitter launcher that penetrates terrain. FIRE to deploy a long line of gas emitters. RE-USE the ability to create a tall wall of toxic gas that Decays opponents that cross it at the cost of fuel. This ability can be RE-USED more than once."
         },
         {
           "slot": "Grenade",
           "name": "Snake Bite",
+          "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/grenade/displayicon.png",
           "description": "EQUIP a chemical launcher. FIRE to launch a canister that shatters upon hitting the floor, creating a lingering chemical zone that damages and applies Vulnerable."
         },
         {
           "slot": "Ultimate",
           "name": "Viper's Pit",
+          "icon": "https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/abilities/ultimate/displayicon.png",
           "description": "EQUIP a chemical sprayer. FIRE to spray a chemical cloud in all directions around Viper, creating a large cloud that Nearsights players and Decays the health of enemies inside of it. HOLD the ability key to disperse the cloud early."
         },
         {
           "slot": "Passive",
           "name": "Toxic",
+          "icon": null,
           "description": "You gradually generate and replenish the toxin that fuels your abilities.  Enemies that cross through Viper's Poison Cloud, Toxic Screen, or Viper's Pit are instantly inflicted with at least 30 Decay. Their Decay level increases the longer they remain in contact with it."
         }
       ]
@@ -784,6 +1060,12 @@
     {
       "uuid": "efba5359-4016-a1e5-7626-b1ae76895940",
       "name": "Vyse",
+      "aliases": [
+        "Vyse"
+      ],
+      "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/5fc02f99-4091-4486-a531-98459a3e95e9/displayicon.png",
       "description": "Metallic mastermind Vyse unleashes liquid metal to isolate, trap, and disarm her enemies. Through cunning and manipulation, she forces all who oppose her to fear the battlefield itself.",
       "role": "Sentinel",
       "roleDescription": "Sentinels are defensive experts who can lock down areas and watch flanks, both on attacker and defender rounds.",
@@ -791,21 +1073,25 @@
         {
           "slot": "Ability1",
           "name": "Shear",
+          "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ability1/displayicon.png",
           "description": "EQUIP filaments of liquid metal. FIRE to place a hidden wall trap. When an enemy crosses, an indestructible wall bursts from the ground behind them. The wall lasts for a brief time before dissipating."
         },
         {
           "slot": "Ability2",
           "name": "Arc Rose",
+          "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ability2/displayicon.png",
           "description": "EQUIP an Arc Rose. Target a surface and FIRE to place a stealthed Arc Rose, or ALT FIRE to place the Arc Rose through it. REUSE to blind all players looking at it. This ability can be picked up to be REDEPLOYED."
         },
         {
           "slot": "Grenade",
           "name": "Razorvine",
+          "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/grenade/displayicon.png",
           "description": "EQUIP a nest of liquid metal. FIRE to launch. Upon landing, the nest becomes invisible. When ACTIVATED, it sprawls out into a large razorvine nest which slows and damages all players who move through it."
         },
         {
           "slot": "Ultimate",
           "name": "Steel Garden",
+          "icon": "https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/abilities/ultimate/displayicon.png",
           "description": "EQUIP a bramble of liquid metal. FIRE to send the metal erupting from you as a torrent of metal thorns, JAMMING enemy primary weapons after a brief windup."
         }
       ]
@@ -813,6 +1099,12 @@
     {
       "uuid": "df1cb487-4902-002e-5c17-d28e83e78588",
       "name": "Waylay",
+      "aliases": [
+        "Waylay"
+      ],
+      "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Thailand's prismatic radiant Waylay transforms into light itself as she darts across the battlefield, striking down her targets through shards of light before flitting back to safety, all in the blink of an eye.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -820,21 +1112,25 @@
         {
           "slot": "Ability2",
           "name": "Refract",
+          "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ability2/displayicon.png",
           "description": "INSTANTLY create a beacon of light on the floor. REACTIVATE to speed back to your beacon as a mote of pure light. You are invulnerable as you travel. Refract resets a charge every two kills."
         },
         {
           "slot": "Grenade",
           "name": "Saturate",
+          "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/grenade/displayicon.png",
           "description": "EQUIP a cluster of light. FIRE to throw the cluster, which upon contact with the ground explodes, Hindering nearby players with a powerful movement and weapon slow."
         },
         {
           "slot": "Ability1",
           "name": "Lightspeed",
+          "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ability1/displayicon.png",
           "description": "EQUIP to prepare for a burst of speed. FIRE to dash forward twice. ALT FIRE to dash once. Only your first dash can send you upward."
         },
         {
           "slot": "Ultimate",
           "name": "Convergent Paths",
+          "icon": "https://media.valorant-api.com/agents/df1cb487-4902-002e-5c17-d28e83e78588/abilities/ultimate/displayicon.png",
           "description": "EQUIP to focus your prismatic power. FIRE to create an afterimage of yourself that projects a beam of light. After a brief delay, you gain a powerful speed boost and the beam expands, Hindering other players in the area."
         }
       ]
@@ -842,6 +1138,12 @@
     {
       "uuid": "7f94d92c-4234-0a36-9646-3a87eb8b5c89",
       "name": "Yoru",
+      "aliases": [
+        "Yoru"
+      ],
+      "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/displayicon.png",
+      "portrait": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/fullportrait.png",
+      "roleIcon": "https://media.valorant-api.com/agents/roles/dbe8757e-9e92-4ed4-b39f-9dfc589691d4/displayicon.png",
       "description": "Japanese native Yoru rips holes straight through reality to infiltrate enemy lines unseen. Using deception and aggression in equal measure, he gets the drop on each target before they know where to look.",
       "role": "Duelist",
       "roleDescription": "Duelists are self-sufficient fraggers who their team expects, through abilities and skills, to get high frags and seek out engagements first.",
@@ -849,21 +1151,25 @@
         {
           "slot": "Grenade",
           "name": "FAKEOUT",
+          "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/grenade/displayicon.png",
           "description": "EQUIP an echo that transforms into a mirror image of Yoru when activated. FIRE to instantly activate the mirror image and send it forward. ALT FIRE to place an inactive echo. USE to transform an inactive echo into a mirror image and send it forward.  Mirror images explode in a Blinding flash when destroyed by enemies."
         },
         {
           "slot": "Ability1",
           "name": "BLINDSIDE",
+          "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ability1/displayicon.png",
           "description": "EQUIP to rip an unstable dimensional fragment from reality. FIRE to throw the fragment, activating a flash that winds up once it collides with a hard surface."
         },
         {
           "slot": "Ability2",
           "name": "GATECRASH",
+          "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ability2/displayicon.png",
           "description": "EQUIP a rift tether FIRE to send the tether forward. ALT FIRE to place a stationary tether. ACTIVATE to teleport to the tether's location. USE to trigger a fake teleport. GATECRASH resets a charge every two kills."
         },
         {
           "slot": "Ultimate",
           "name": "DIMENSIONAL DRIFT",
+          "icon": "https://media.valorant-api.com/agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89/abilities/ultimate/displayicon.png",
           "description": "EQUIP a mask that can see between dimensions. FIRE to drift into Yoru's dimension, unable to be affected or seen by enemies from the outside. REACTIVATE to exit Yoru's dimension early."
         }
       ]
@@ -874,6 +1180,14 @@
       "uuid": "224b0a95-48b9-f703-1bd8-67aca101a61f",
       "name": "Abyss",
       "coordinates": "70° 50' AJ\" N, 9° 00' VX\" W",
+      "icon": "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000081,
+        "yMultiplier": -0.000081,
+        "xScalarToAdd": 0.5,
+        "yScalarToAdd": 0.5
+      },
       "callouts": [
         {
           "region": "Bridge",
@@ -1019,6 +1333,14 @@
       "uuid": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
       "name": "Ascent",
       "coordinates": "45°26'BF'N,12°20'Q'E",
+      "icon": "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/splash.png",
+      "transforms": {
+        "xMultiplier": 0.00007,
+        "yMultiplier": -0.00007,
+        "xScalarToAdd": 0.813895,
+        "yScalarToAdd": 0.573242
+      },
       "callouts": [
         {
           "region": "Tree",
@@ -1155,9 +1477,31 @@
       ]
     },
     {
+      "uuid": "1f10dab3-4294-3827-fa35-c2aa00213cf3",
+      "name": "Basic Training",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/1f10dab3-4294-3827-fa35-c2aa00213cf3/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
       "uuid": "2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba",
       "name": "Bind",
       "coordinates": "34°2'A'N,6°51'Z'W",
+      "icon": "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000059,
+        "yMultiplier": -0.000059,
+        "xScalarToAdd": 0.576941,
+        "yScalarToAdd": 0.967566
+      },
       "callouts": [
         {
           "region": "Exit",
@@ -1309,6 +1653,14 @@
       "uuid": "2fb9a4fd-47b8-4e7d-a969-74b4046ebd53",
       "name": "Breeze",
       "coordinates": "26°11'AG\"N 71°10'WY\"W",
+      "icon": "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/splash.png",
+      "transforms": {
+        "xMultiplier": 0.00007,
+        "yMultiplier": -0.00007,
+        "xScalarToAdd": 0.465123,
+        "yScalarToAdd": 0.833078
+      },
       "callouts": [
         {
           "region": "Hall",
@@ -1454,6 +1806,14 @@
       "uuid": "1c18ab1f-420d-0d8b-71d0-77ad3c439115",
       "name": "Corrode",
       "coordinates": "48° 38' FH\" N8, 1° 33' YV\" W8",
+      "icon": "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115/splash.png",
+      "transforms": {
+        "xMultiplier": 0.00007,
+        "yMultiplier": -0.00007,
+        "xScalarToAdd": 0.526158,
+        "yScalarToAdd": 0.5
+      },
       "callouts": [
         {
           "region": "Crane",
@@ -1587,6 +1947,14 @@
       "uuid": "690b3ed2-4dff-945b-8223-6da834e30d24",
       "name": "District",
       "coordinates": null,
+      "icon": "https://media.valorant-api.com/maps/690b3ed2-4dff-945b-8223-6da834e30d24/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/690b3ed2-4dff-945b-8223-6da834e30d24/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
       "callouts": [
         {
           "region": "Box",
@@ -1672,6 +2040,14 @@
       "uuid": "2c09d728-42d5-30d8-43dc-96a05cc7ee9d",
       "name": "Drift",
       "coordinates": null,
+      "icon": "https://media.valorant-api.com/maps/2c09d728-42d5-30d8-43dc-96a05cc7ee9d/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/2c09d728-42d5-30d8-43dc-96a05cc7ee9d/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
       "callouts": [
         {
           "region": "Alley",
@@ -1745,6 +2121,14 @@
       "uuid": "b529448b-4d60-346e-e89e-00a4c527a405",
       "name": "Fracture",
       "coordinates": "35°48'BI\"N 106°08'YQ\"W",
+      "icon": "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/b529448b-4d60-346e-e89e-00a4c527a405/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000078,
+        "yMultiplier": -0.000078,
+        "xScalarToAdd": 0.556952,
+        "yScalarToAdd": 1.155886
+      },
       "callouts": [
         {
           "region": "Bridge",
@@ -1881,9 +2265,31 @@
       ]
     },
     {
+      "uuid": "d6336a5a-428f-c591-98db-c8a291159134",
+      "name": "Glitch",
+      "coordinates": null,
+      "icon": "https://media.valorant-api.com/maps/d6336a5a-428f-c591-98db-c8a291159134/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/d6336a5a-428f-c591-98db-c8a291159134/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
       "uuid": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047",
       "name": "Haven",
       "coordinates": "27°28'A'N,89°38'WZ'E",
+      "icon": "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000075,
+        "yMultiplier": -0.000075,
+        "xScalarToAdd": 1.09345,
+        "yScalarToAdd": 0.642728
+      },
       "callouts": [
         {
           "region": "Garden",
@@ -2017,6 +2423,14 @@
       "uuid": "e2ad5c54-4114-a870-9641-8ea21279579a",
       "name": "Icebox",
       "coordinates": "76°44' A\"N 149°30' Z\"E",
+      "icon": "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000072,
+        "yMultiplier": -0.000072,
+        "xScalarToAdd": 0.460214,
+        "yScalarToAdd": 0.304687
+      },
       "callouts": [
         {
           "region": "Garage",
@@ -2174,6 +2588,14 @@
       "uuid": "12452a9d-48c3-0b02-e7eb-0381c3520404",
       "name": "Kasbah",
       "coordinates": null,
+      "icon": "https://media.valorant-api.com/maps/12452a9d-48c3-0b02-e7eb-0381c3520404/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/12452a9d-48c3-0b02-e7eb-0381c3520404/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
       "callouts": [
         {
           "region": "Spawn",
@@ -2313,6 +2735,14 @@
       "uuid": "2fe4ed3a-450a-948b-6d6b-e89a78e680a9",
       "name": "Lotus",
       "coordinates": "14°07'AD.4\"N8 74°53'XY\"E8",
+      "icon": "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000072,
+        "yMultiplier": -0.000072,
+        "xScalarToAdd": 0.454789,
+        "yScalarToAdd": 0.917752
+      },
       "callouts": [
         {
           "region": "Top",
@@ -2488,6 +2918,14 @@
       "uuid": "fd267378-4d1d-484f-ff52-77821ed10dc2",
       "name": "Pearl",
       "coordinates": "38°42'ED\"N8 9°08'XS\"W8",
+      "icon": "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/fd267378-4d1d-484f-ff52-77821ed10dc2/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000078,
+        "yMultiplier": -0.000078,
+        "xScalarToAdd": 0.480469,
+        "yScalarToAdd": 0.916016
+      },
       "callouts": [
         {
           "region": "Hall",
@@ -2648,9 +3086,101 @@
       ]
     },
     {
+      "uuid": "de28aa9b-4cbe-1003-320e-6cb3ec309557",
+      "name": "Piazza",
+      "coordinates": null,
+      "icon": "https://media.valorant-api.com/maps/de28aa9b-4cbe-1003-320e-6cb3ec309557/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/de28aa9b-4cbe-1003-320e-6cb3ec309557/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "a9009649-421f-d5d5-f80c-0cbe02c125bb",
+      "name": "Skirmish A",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/a9009649-421f-d5d5-f80c-0cbe02c125bb/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "a38a3f9a-4042-844c-8970-a3ac2f7ce93d",
+      "name": "Skirmish B",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/a38a3f9a-4042-844c-8970-a3ac2f7ce93d/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "a264de0f-4a04-9c78-c97a-a6b192ce6e86",
+      "name": "Skirmish C",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/a264de0f-4a04-9c78-c97a-a6b192ce6e86/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "1c7555fc-4bc6-3b98-9674-789d47ef6c50",
+      "name": "Skirmish D",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/1c7555fc-4bc6-3b98-9674-789d47ef6c50/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "4490f1d6-4818-bf5f-9b3a-9c9a8dbb52ed",
+      "name": "Skirmish E",
+      "coordinates": null,
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/4490f1d6-4818-bf5f-9b3a-9c9a8dbb52ed/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
       "uuid": "d960549e-485c-e861-8d71-aa9d1aed12a2",
       "name": "Split",
       "coordinates": "35°41'CD'N,139°41'WX'E",
+      "icon": "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/d960549e-485c-e861-8d71-aa9d1aed12a2/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000078,
+        "yMultiplier": -0.000078,
+        "xScalarToAdd": 0.842188,
+        "yScalarToAdd": 0.697578
+      },
       "callouts": [
         {
           "region": "Back",
@@ -2802,6 +3332,14 @@
       "uuid": "756da597-416b-c0f2-f47b-afbdf28670bc",
       "name": "Summit",
       "coordinates": "29° 18' FC\" N, 110° 25' ZQ\" E",
+      "icon": "https://media.valorant-api.com/maps/756da597-416b-c0f2-f47b-afbdf28670bc/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/756da597-416b-c0f2-f47b-afbdf28670bc/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000075,
+        "yMultiplier": -0.000075,
+        "xScalarToAdd": 0.047401,
+        "yScalarToAdd": 0.978891
+      },
       "callouts": [
         {
           "region": "Bottom",
@@ -2953,6 +3491,14 @@
       "uuid": "92584fbe-486a-b1b2-9faa-39b0f486b498",
       "name": "Sunset",
       "coordinates": "34° 2′ C″ N, 118° 12′ YT″ W",
+      "icon": "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/displayicon.png",
+      "splash": "https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/splash.png",
+      "transforms": {
+        "xMultiplier": 0.000078,
+        "yMultiplier": -0.000078,
+        "xScalarToAdd": 0.5,
+        "yScalarToAdd": 0.515625
+      },
       "callouts": [
         {
           "region": "Boba",
@@ -3057,12 +3603,45 @@
           "y": -400
         }
       ]
+    },
+    {
+      "uuid": "ee613ee9-28b7-4beb-9666-08db13bb2244",
+      "name": "The Range",
+      "coordinates": "45°26'FF'N,12°20'Q'E",
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/ee613ee9-28b7-4beb-9666-08db13bb2244/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
+    },
+    {
+      "uuid": "5914d1e0-40c4-cfdd-6b88-eba06347686c",
+      "name": "The Range",
+      "coordinates": "45°26'FF'N,12°20'Q'E",
+      "icon": null,
+      "splash": "https://media.valorant-api.com/maps/5914d1e0-40c4-cfdd-6b88-eba06347686c/splash.png",
+      "transforms": {
+        "xMultiplier": 0,
+        "yMultiplier": 0,
+        "xScalarToAdd": 0,
+        "yScalarToAdd": 0
+      },
+      "callouts": []
     }
   ],
   "weapons": [
     {
       "uuid": "55d8a0f4-4274-ca67-fe2c-06ab45efdf58",
       "name": "Ares",
+      "aliases": [
+        "Ares"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/55d8a0f4-4274-ca67-fe2c-06ab45efdf58/displayicon.png",
+      "price": 1600,
       "category": "Heavy",
       "fireRate": 13,
       "magazineSize": 50,
@@ -3087,6 +3666,11 @@
     {
       "uuid": "410b2e0b-4ceb-1321-1727-20858f7f3477",
       "name": "Bandit",
+      "aliases": [
+        "Bandit"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/410b2e0b-4ceb-1321-1727-20858f7f3477/displayicon.png",
+      "price": 600,
       "category": "Sidearm",
       "fireRate": 5.1,
       "magazineSize": 8,
@@ -3118,6 +3702,11 @@
     {
       "uuid": "910be174-449b-c412-ab22-d0873436b21b",
       "name": "Bucky",
+      "aliases": [
+        "Bucky"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/910be174-449b-c412-ab22-d0873436b21b/displayicon.png",
+      "price": 850,
       "category": "Shotgun",
       "fireRate": 1.1,
       "magazineSize": 5,
@@ -3149,6 +3738,11 @@
     {
       "uuid": "ae3de142-4d85-2547-dd26-4e90bed35cf7",
       "name": "Bulldog",
+      "aliases": [
+        "Bulldog"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/ae3de142-4d85-2547-dd26-4e90bed35cf7/displayicon.png",
+      "price": 2050,
       "category": "Rifle",
       "fireRate": 10,
       "magazineSize": 24,
@@ -3166,6 +3760,11 @@
     {
       "uuid": "29a0cfab-485b-f5d5-779a-b59f85e204a8",
       "name": "Classic",
+      "aliases": [
+        "Classic"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/29a0cfab-485b-f5d5-779a-b59f85e204a8/displayicon.png",
+      "price": 0,
       "category": "Sidearm",
       "fireRate": 6.75,
       "magazineSize": 12,
@@ -3190,6 +3789,11 @@
     {
       "uuid": "44d4e95c-4157-0037-81b2-17841bf2e8e3",
       "name": "Frenzy",
+      "aliases": [
+        "Frenzy"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/44d4e95c-4157-0037-81b2-17841bf2e8e3/displayicon.png",
+      "price": 450,
       "category": "Sidearm",
       "fireRate": 10,
       "magazineSize": 15,
@@ -3214,6 +3818,11 @@
     {
       "uuid": "1baa85b4-4c70-1284-64bb-6481dfc3bb4e",
       "name": "Ghost",
+      "aliases": [
+        "Ghost"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/1baa85b4-4c70-1284-64bb-6481dfc3bb4e/displayicon.png",
+      "price": 500,
       "category": "Sidearm",
       "fireRate": 6.75,
       "magazineSize": 13,
@@ -3238,6 +3847,11 @@
     {
       "uuid": "4ade7faa-4cf1-8376-95ef-39884480959b",
       "name": "Guardian",
+      "aliases": [
+        "Guardian"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/4ade7faa-4cf1-8376-95ef-39884480959b/displayicon.png",
+      "price": 2250,
       "category": "Rifle",
       "fireRate": 5.25,
       "magazineSize": 12,
@@ -3255,6 +3869,11 @@
     {
       "uuid": "ec845bf4-4f79-ddda-a3da-0db3774b2794",
       "name": "Judge",
+      "aliases": [
+        "Judge"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/ec845bf4-4f79-ddda-a3da-0db3774b2794/displayicon.png",
+      "price": 1850,
       "category": "Shotgun",
       "fireRate": 3.5,
       "magazineSize": 5,
@@ -3286,6 +3905,11 @@
     {
       "uuid": "c4883e50-4494-202c-3ec3-6b8a9284f00b",
       "name": "Marshal",
+      "aliases": [
+        "Marshal"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/c4883e50-4494-202c-3ec3-6b8a9284f00b/displayicon.png",
+      "price": 950,
       "category": "Sniper",
       "fireRate": 1.5,
       "magazineSize": 5,
@@ -3303,6 +3927,11 @@
     {
       "uuid": "2f59173c-4bed-b6c3-2191-dea9b58be9c7",
       "name": "Melee",
+      "aliases": [
+        "Melee"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/2f59173c-4bed-b6c3-2191-dea9b58be9c7/displayicon.png",
+      "price": null,
       "category": "Melee",
       "fireRate": null,
       "magazineSize": null,
@@ -3312,6 +3941,11 @@
     {
       "uuid": "63e6c2b6-4a8e-869c-3d4c-e38355226584",
       "name": "Odin",
+      "aliases": [
+        "Odin"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/63e6c2b6-4a8e-869c-3d4c-e38355226584/displayicon.png",
+      "price": 3200,
       "category": "Heavy",
       "fireRate": 12,
       "magazineSize": 100,
@@ -3336,6 +3970,11 @@
     {
       "uuid": "a03b24d3-4319-996d-0f8c-94bbfba1dfc7",
       "name": "Operator",
+      "aliases": [
+        "Operator"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/a03b24d3-4319-996d-0f8c-94bbfba1dfc7/displayicon.png",
+      "price": 4700,
       "category": "Sniper",
       "fireRate": 0.6,
       "magazineSize": 5,
@@ -3353,6 +3992,11 @@
     {
       "uuid": "5f0aaf7a-4289-3998-d5ff-eb9a5cf7ef5c",
       "name": "Outlaw",
+      "aliases": [
+        "Outlaw"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/5f0aaf7a-4289-3998-d5ff-eb9a5cf7ef5c/displayicon.png",
+      "price": 2400,
       "category": "Sniper",
       "fireRate": 2.75,
       "magazineSize": 2,
@@ -3370,6 +4014,11 @@
     {
       "uuid": "ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a",
       "name": "Phantom",
+      "aliases": [
+        "Phantom"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a/displayicon.png",
+      "price": 2900,
       "category": "Rifle",
       "fireRate": 11,
       "magazineSize": 30,
@@ -3394,6 +4043,11 @@
     {
       "uuid": "e336c6b8-418d-9340-d77f-7a9e4cfe0702",
       "name": "Sheriff",
+      "aliases": [
+        "Sheriff"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/e336c6b8-418d-9340-d77f-7a9e4cfe0702/displayicon.png",
+      "price": 800,
       "category": "Sidearm",
       "fireRate": 4,
       "magazineSize": 6,
@@ -3418,6 +4072,11 @@
     {
       "uuid": "42da8ccc-40d5-affc-beec-15aa47b42eda",
       "name": "Shorty",
+      "aliases": [
+        "Shorty"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/42da8ccc-40d5-affc-beec-15aa47b42eda/displayicon.png",
+      "price": 300,
       "category": "Sidearm",
       "fireRate": 3,
       "magazineSize": 2,
@@ -3449,6 +4108,11 @@
     {
       "uuid": "462080d1-4035-2937-7c09-27aa2a5c27a7",
       "name": "Spectre",
+      "aliases": [
+        "Spectre"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/462080d1-4035-2937-7c09-27aa2a5c27a7/displayicon.png",
+      "price": 1600,
       "category": "SMG",
       "fireRate": 13.333,
       "magazineSize": 30,
@@ -3480,6 +4144,11 @@
     {
       "uuid": "f7e1b454-4ad4-1063-ec0a-159e56b58941",
       "name": "Stinger",
+      "aliases": [
+        "Stinger"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/f7e1b454-4ad4-1063-ec0a-159e56b58941/displayicon.png",
+      "price": 1100,
       "category": "SMG",
       "fireRate": 16,
       "magazineSize": 20,
@@ -3504,6 +4173,11 @@
     {
       "uuid": "9c82e19d-4575-0200-1a81-3eacf00cf872",
       "name": "Vandal",
+      "aliases": [
+        "Vandal"
+      ],
+      "icon": "https://media.valorant-api.com/weapons/9c82e19d-4575-0200-1a81-3eacf00cf872/displayicon.png",
+      "price": 2900,
       "category": "Rifle",
       "fireRate": 9.75,
       "magazineSize": 25,

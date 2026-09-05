@@ -1,3 +1,4 @@
+import { killRoundOffset } from "../services/match-kill-round";
 import type { MatchDetail, MatchPlayerDetail } from "./types";
 import { inferInitialAttackerTeam, sideForRound } from "../services/match-side";
 import { normalizeMapSpatialPosition, normalizedMapSpatialResource } from "./map-spatial-resources";
@@ -102,7 +103,7 @@ export function buildUserMatchScoreboardProjectionV1(
 export function buildUserSpatialEvidenceProjectionV1(detail: MatchDetail): UserSpatialEvidenceProjectionV1 {
   const map = normalizedMapSpatialResource(detail.mapName);
   const initialAttackerTeam = inferInitialAttackerTeam(detail);
-  const eventOffset = detail.killEvents.some((event) => event.round === 0) ? 1 : 0;
+  const eventOffset = killRoundOffset(detail);
   let invalidSamples = 0;
   let eventsWithPositions = 0;
   const samples: UserSpatialEvidenceProjectionV1["samples"] = [];

@@ -1,3 +1,4 @@
+import { matchCompleteness, completenessWarnings } from "./match-completeness";
 import type {
   MatchDetail,
   MatchEndState,
@@ -48,14 +49,13 @@ export function normalizeMatchDetail(
   const players = readPlayers(raw, killEvents, rounds, scoredRoundCount);
   const teams = readTeams(raw, players);
   const endState = readEndState(raw, teams);
-  const hasFullScoreboard = players.length > 1;
   const averageTierName =
     stringAt(raw, ["metadata", "average_tier", "name"]) ??
     stringAt(raw, ["metadata", "average_rank", "name"]) ??
     deriveAverageTierName(players);
   const gameVersion = stringAt(raw, ["metadata", "game_version"]);
 
-  return {
+  const detail: MatchDetail = {
     matchId,
     region: options.region,
     platform: options.platform,
@@ -85,11 +85,14 @@ export function normalizeMatchDetail(
     teams,
     rounds,
     killEvents,
+    killRoundOffset:
+      isRecord(valueAt(raw, ["metadata", "queue"])) || killEvents.some((event) => event.round === 0) ? 1 : 0,
     source: options.source,
-    warnings: hasFullScoreboard
-      ? []
-      : ["Only cached player-summary data is available for this match until Henrik live match detail is fetched."],
+    warnings: [],
   };
+  detail.evidence = matchCompleteness(detail, raw);
+  detail.warnings = completenessWarnings(detail.evidence);
+  return detail;
 }
 
 function readPlayers(

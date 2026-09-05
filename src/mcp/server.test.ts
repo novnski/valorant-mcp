@@ -1,3 +1,5 @@
+import { PatchNotesRuntime } from "./patch-notes-runtime";
+import { rawPage } from "./raw-page";
 import { afterEach, describe, expect, test } from "bun:test";
 
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
@@ -9,6 +11,7 @@ import { LineupsRuntime, type LineupSearchInput, type NormalizedLineup } from ".
 import {
   buildDuelReplay,
   buildMatchTimeline,
+  pageMatchTimeline,
   buildPositionReview,
   buildRoundIntelligence,
   buildRoundKillList,
@@ -32,6 +35,8 @@ describe("valorant MCP server", () => {
     expect(listed.tools.map((tool) => tool.name)).toEqual([
       "valorant_get_player",
       "valorant_list_matches",
+      "valorant_get_rank_history",
+      "valorant_compare_matches",
       "valorant_get_match",
       "valorant_analyze_match",
       "valorant_get_match_timeline",
@@ -41,6 +46,9 @@ describe("valorant MCP server", () => {
       "valorant_review_deaths",
       "valorant_review_position",
       "valorant_get_game_knowledge",
+      "valorant_get_game_content",
+      "valorant_get_game_asset",
+      "valorant_get_patch_notes",
       "valorant_get_raw_match",
       "valorant_render_round",
       "valorant_search_lineups",
@@ -350,6 +358,15 @@ function fakeRuntime(): ValorantToolRuntime {
   });
   const cache = emptyCacheProvenance("memory");
   return {
+    async getRankHistory() {
+      throw new Error("Not used by this fixture");
+    },
+    async compareMatches() {
+      throw new Error("Not used by this fixture");
+    },
+    async getPatchNotes(input) {
+      return new PatchNotesRuntime(null).getPatchNotes(input);
+    },
     async getPlayer() {
       return {
         identity: {
@@ -359,6 +376,7 @@ function fakeRuntime(): ValorantToolRuntime {
           tagLine: "EU",
           region: "eu",
           platform: "pc",
+          availablePlatforms: ["pc"],
           accountLevel: 201,
           cardId: null,
           titleId: null,
@@ -385,6 +403,7 @@ function fakeRuntime(): ValorantToolRuntime {
           tagLine: "EU",
           region: "eu",
           platform: "pc",
+          availablePlatforms: ["pc"],
           accountLevel: 201,
           cardId: null,
           titleId: null,
@@ -411,7 +430,7 @@ function fakeRuntime(): ValorantToolRuntime {
       throw new Error("not used in this test");
     },
     async getMatchTimeline() {
-      return { ...buildMatchTimeline(detail, "sanitized-profile-puuid"), cache };
+      return { ...pageMatchTimeline(buildMatchTimeline(detail, "sanitized-profile-puuid"), {}), cache };
     },
     async getRound() {
       throw new Error("not used in this test");
@@ -461,7 +480,7 @@ function fakeRuntime(): ValorantToolRuntime {
       return {
         matchId: input.matchId,
         section: input.section,
-        data: { metadata: "fixture" },
+        ...rawPage({ metadata: "fixture" }, input),
         source: "henrik-raw",
         cache,
       };
@@ -471,6 +490,8 @@ function fakeRuntime(): ValorantToolRuntime {
 
 function stubLineups(): LineupsRuntime {
   const lineup: NormalizedLineup = {
+    source: "strats.gg",
+    patch_validation: "unknown",
     id: "lineup-1",
     agent: "Sova",
     map: "Ascent",

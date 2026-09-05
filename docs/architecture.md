@@ -9,12 +9,14 @@ MCP client
     v
 valorant-mcp
     |
-    +-- player identity and rank ----------> Henrik API
+    +-- player identity, rank/RR history --> Henrik API
+    +-- patch publications ----------------> Henrik / bundled Riot links
     +-- recent match list -----------------> Henrik API
     +-- selected match detail ----------+--> local SQLite cache
     |                                  |
     |                                  +--> Henrik only on cache miss
     +-- lineups ---------------------------> Strats.gg open API
+    +-- explicit fresh content/assets -----> Valorant-API / media host
     |
     +-- normalizers and evidence services (local, deterministic)
     +-- tactical Canvas renderer (local bundled assets)
@@ -62,3 +64,13 @@ MCP returns the PNG as an `image` content block. Clients decide how to display o
 One tool factory serves stdio and authenticated localhost Streamable HTTP through the current SDK. The SDK handles modern and legacy protocol negotiation. HTTP uses a fresh protocol server per request, with one shared application runtime for the single local user; the shared runtime owns request pacing and the selected-match cache. No protocol sessions or user accounts are stored.
 
 HTTP binds only to IPv4 loopback, enforces a separate Bearer token, validates Host and Origin, and caps request bodies at 1 MiB. It does not enable cross-origin browser access. The Henrik credential is never accepted from an HTTP request. Stdio remains the default and reserves stdout for protocol messages. EOF and termination signals close the runtime; HTTP termination also closes the listener.
+
+## Bounded provider and content reads
+
+`ProviderTransport` serializes request starts, observes safe quota/cache headers, applies shared cooldowns, and bounds queue/fetch/body time. Requests share pending reads; cancelling one waiter does not cancel others, while the final cancelled waiter aborts upstream work. Transient TTL/LRU caches have entry and byte budgets, including lineup catalogs and selected public content. HTTP tool factories share these runtimes. These caches add no durable state.
+
+Capability coverage independently describes roster, scoreboard, rounds, kills, economy, objectives, positions and facing. Missing evidence yields partial/unknown values rather than invented zeros or complete tactical claims. Saved projection keys include the analysis version plus knowledge and transform hashes, so content changes trigger local reprojection without Henrik I/O.
+
+Public content is a narrow metadata/artwork exception to the Henrik match-data boundary. Runtime lookups request a single UUID and selected fields, verify image-host URLs, and return at most one 512px/256KiB PNG. Maintainer fetch/build scripts produce reproducible, hashed source/content/asset manifests. Current builds and bundled roles do not prove historical patch applicability or competitive map rotation.
+
+RR history lists references without opening matches. Recent-list windows retain provider offsets while removing duplicate IDs; a full window leaves further availability unknown. Comparisons load only two to five explicit IDs and group descriptive metrics by map, mode, patch and role with coverage denominators. They do not discover history or claim skill trends.

@@ -87,25 +87,30 @@ An example is in [`examples/http-mcp.json`](examples/http-mcp.json). Use `--http
 
 ## Tools
 
-| Tool                          | Use                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `valorant_get_player`         | Identity, account level, current rank/RR, peak rank                      |
-| `valorant_list_matches`       | 1–20 recent matches with exact IDs; optional queue filter                |
-| `valorant_get_match`          | Teams, result, scoreboard, combat and economy evidence                   |
-| `valorant_analyze_match`      | Turning points, performance, economy, damage, abilities, duels           |
-| `valorant_get_match_timeline` | Per-round facts, supported inferences, and score transitions             |
-| `valorant_get_round`          | One round's complete normalized event ledger                             |
-| `valorant_explain_round`      | Resolve a round number or score such as 6–7                              |
-| `valorant_list_round_kills`   | Numbered kills for selecting a duel                                      |
-| `valorant_review_deaths`      | Filtered death review, evidence, and tactical PNG                        |
-| `valorant_review_position`    | A death relative to recorded living teammates                            |
-| `valorant_render_round`       | Tactical PNG for one recorded kill event                                 |
-| `valorant_get_game_knowledge` | Bundled agents, abilities, maps, callouts, weapons, terminology          |
-| `valorant_get_raw_match`      | Provider metadata, players, teams, rounds, or kills for verification     |
-| `valorant_search_lineups`     | Strats.gg lineups filtered by agent, map, side, ability, level, position |
-| `valorant_get_lineup`         | One lineup's details and provider media links                            |
+| Tool                          | Use                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------- |
+| `valorant_get_player`         | Identity, account level, current rank/RR, peak rank                           |
+| `valorant_list_matches`       | 1–20 provider rows, unique IDs, queue/map filters, explicit start/next window |
+| `valorant_get_rank_history`   | Recent RR, season, refunds and derank protection; up to 50 rows               |
+| `valorant_compare_matches`    | One explicit player across 2–5 selected matches, with context and coverage    |
+| `valorant_get_match`          | Teams, result, scoreboard, combat and economy evidence                        |
+| `valorant_analyze_match`      | Turning points, performance, economy, damage, abilities, duels                |
+| `valorant_get_match_timeline` | Per-round facts, supported inferences, and score transitions                  |
+| `valorant_get_round`          | One round's complete normalized event ledger                                  |
+| `valorant_explain_round`      | Resolve a round number or score such as 6–7                                   |
+| `valorant_list_round_kills`   | Numbered kills for selecting a duel                                           |
+| `valorant_review_deaths`      | Filtered death review, evidence, and tactical PNG                             |
+| `valorant_review_position`    | A death relative to recorded living teammates                                 |
+| `valorant_render_round`       | Tactical PNG for one recorded kill event                                      |
+| `valorant_get_game_knowledge` | Bundled agents, abilities, maps, callouts, weapons, terminology               |
+| `valorant_get_game_content`   | One agent/map/weapon from public metadata, or an explicit bundled fallback    |
+| `valorant_get_game_asset`     | One native PNG; bundled by default, explicit fresh ability artwork            |
+| `valorant_get_patch_notes`    | Canonical Riot publication links, bounded sections when available             |
+| `valorant_get_raw_match`      | Exact paged raw fields with expandable JSON pointers                          |
+| `valorant_search_lineups`     | Strats.gg lineups filtered by agent, map, side, ability, level, position      |
+| `valorant_get_lineup`         | One lineup's details and provider media links                                 |
 
-Tools return structured data alongside text. Tactical images are standard MCP `image` content blocks; display depends on the client. [`skills/valorant-analyst`](skills/valorant-analyst/SKILL.md) is an optional evidence-review procedure for clients that support skills.
+The 20 tools return structured data alongside text. Timeline v2 uses event/participant dictionaries and round windows; raw v2 uses JSON-pointer pages. See [response contracts](docs/response-contracts.md) for migration, source timestamps and byte limits. Tactical images are standard MCP `image` content blocks; display depends on the client. [`skills/valorant-analyst`](skills/valorant-analyst/SKILL.md) is an optional evidence-review procedure for clients that support skills.
 
 ## Configuration and local data
 
@@ -118,15 +123,15 @@ Tools return structured data alongside text. Tactical images are standard MCP `i
 
 The default cache is `~/Library/Application Support/Valorant MCP/matches.sqlite3` on macOS, `$XDG_DATA_HOME/valorant-mcp/matches.sqlite3` (or `~/.local/share/...`) on Linux, and `%LOCALAPPDATA%/Valorant MCP/matches.sqlite3` on Windows.
 
-Recent lists are live with short in-memory reuse and are never saved to disk. Opening a specific match saves only that match. Repeated analysis can reuse it across restarts. The cache contains player IDs and match evidence; treat it as personal data. Delete the SQLite file while all server processes are stopped to clear saved matches. Cache failures are reported in tool errors or provenance warnings.
+Recent lists are live with short in-memory reuse and are never saved to disk. Opening a specific match saves only that match. Repeated analysis can reuse it across restarts. `valorant_get_match(refresh=true)` explicitly refreshes only that ID, with a 60-second cooldown; an incomplete refresh cannot replace richer saved evidence. RR and list reads use bounded memory caches only. Comparison opens only the supplied IDs. The cache contains player IDs and match evidence; treat it as personal data. Delete the SQLite file while all server processes are stopped to clear saved matches. Cache failures are reported in tool errors or provenance warnings.
 
-Henrik receives the player and match identifiers you request. Lineup searches contact Strats.gg's public API. No analytics or game-client access is included. Multiple running server processes each pace independently; account-wide limits still apply.
+Henrik receives the player and match identifiers you request. Lineup searches contact Strats.gg's public API. Explicit fresh content/artwork calls contact Valorant-API and its media host; patch publications are discovered through Henrik with known bundled Riot links as fallback. No analytics or game-client access is included. Multiple running server processes each pace independently; account-wide limits still apply.
 
 ## Limits
 
 This is post-match analysis from provider data. Recorded kill positions are discrete snapshots. Facing cones do not prove visibility through walls or utility. There is no POV, continuous movement, comms, intent, or crosshair evidence. Reports distinguish observations from inferences.
 
-Recent history depends on Henrik availability and access; it is not a lifetime archive. Tracker profile platform/playlist hints are applied, but its season filter is not. Local game knowledge is a bundled snapshot and can lag patches. Strats.gg's lineup API is an external dependency and can change independently.
+Recent history depends on Henrik availability and access; it is not a lifetime archive. Tracker profile platform/playlist hints are applied, but its season filter is not. Local game knowledge is a dated bundled snapshot and can lag patches. Fresh public content has its own build manifest; it does not establish an older match's patch or current competitive map rotation. Patch articles can have no body, in which case the tool returns metadata and the canonical link. RR providerElo is not Riot's hidden MMR. Selected comparisons are descriptive samples, not proof of skill trends. Strats.gg's lineup API is an external dependency and can change independently.
 
 ## Troubleshooting
 
@@ -146,6 +151,15 @@ bun run check         # build, strict typecheck, formatting, offline tests
 bun run smoke:package # isolated release install; test stdio and localhost HTTP
 bun run format        # format source and documentation
 ```
+
+Content refresh is a deliberate maintainer action. Fetch a snapshot, then rebuild selected fields and the manifest. The build verifies source hashes and map transforms; review changes before replacing tactical assets.
+
+```sh
+bun run scripts/fetch-game-content.ts /tmp/valorant-content en-US
+bun run scripts/build-game-knowledge.ts /tmp/valorant-content
+```
+
+The manifest records locale, source URLs/hashes, fetch time, content version, selected fields, map-transform hash, and bundled image hashes. Rebuilding from the same snapshot produces identical output. Runtime content/image requests never edit these files.
 
 See [contributing and verification](CONTRIBUTING.md), [architecture](docs/architecture.md), and [evaluation tasks](evals/README.md). GitHub is the distribution source; this project is not currently published to npm. `bun pm pack` builds a package containing the executable, required artwork, and license notices.
 

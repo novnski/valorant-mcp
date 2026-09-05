@@ -1,3 +1,5 @@
+import { ProviderTransport, ProviderTransportError } from "./provider-transport";
+import { stratsCatalog, stratsGroups, stratsLineup } from "./provider-validation";
 // Strats.gg open lineups API client. Read-only, no key, light pacing.
 // The Strats.gg lineup tool exposes a public JSON API under /internal/api/v1
 // for maps, characters, and per-map-source per-character lineups.
@@ -64,7 +66,7 @@ export type StratsGroup = {
   lineups: StratsLineup[] | null;
 };
 
-export type StratsFailureCode = "not-found" | "invalid-payload" | "unavailable" | "upstream-failure";
+export type StratsFailureCode = import("./provider-transport").ProviderFailure;
 
 export class StratsApiError extends Error {
   readonly retryable: boolean;
@@ -73,10 +75,11 @@ export class StratsApiError extends Error {
     message: string,
     readonly status: number | null,
     readonly code: StratsFailureCode,
+    readonly retryAt: string | null = null,
   ) {
     super(message);
     this.name = "StratsApiError";
-    this.retryable = code === "unavailable" || code === "upstream-failure";
+    this.retryable = code === "rate-limited" || code === "unavailable" || code === "upstream-failure";
   }
 }
 
@@ -84,36 +87,33 @@ type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Respons
 
 export class StratsClient {
   private readonly baseUrl = "https://api.strats.gg/internal/api/v1";
-  private readonly timeoutMs = 12_000;
-  private readonly fetcher: Fetcher;
-  private nextRequestAt = 0;
-  private throttleChain: Promise<void> = Promise.resolve();
+  private readonly transport: ProviderTransport;
 
   constructor(
     private readonly requestsPerMinute = 60,
     fetcher?: Fetcher,
   ) {
-    this.fetcher = fetcher ?? fetch;
     if (!Number.isInteger(requestsPerMinute) || requestsPerMinute < 1 || requestsPerMinute > 300) {
       throw new Error("requestsPerMinute must be an integer between 1 and 300");
     }
+    this.transport = new ProviderTransport("strats.gg", Math.ceil(60_000 / requestsPerMinute), fetcher);
   }
 
   async listMaps(): Promise<StratsMap[]> {
-    return this.get<StratsMap[]>("/games/valorant/maps");
+    return this.validated<StratsMap[]>("/games/valorant/maps", stratsCatalog);
   }
 
   async listCharacters(): Promise<StratsCharacter[]> {
-    return this.get<StratsCharacter[]>("/games/valorant/characters");
+    return this.validated<StratsCharacter[]>("/games/valorant/characters", stratsCatalog);
   }
 
   async listGroupedLineups(mapSourceId: string, characterId: string): Promise<StratsGroup[]> {
     const path = `/games/valorant/map_sources/${encodeURIComponent(mapSourceId)}/characters/${encodeURIComponent(characterId)}/lineups/grouped`;
-    return this.get<StratsGroup[]>(path);
+    return this.validated<StratsGroup[]>(path, stratsGroups);
   }
 
   async getLineup(lineupId: string): Promise<StratsLineup> {
-    const lineup = await this.get<StratsLineup>(`/lineups/${encodeURIComponent(lineupId)}`);
+    const lineup = await this.validated<StratsLineup>(`/lineups/${encodeURIComponent(lineupId)}`, stratsLineup);
     if (!lineup || typeof lineup !== "object" || !lineup.id) {
       throw new StratsApiError(
         `Strats.gg returned an unexpected payload for lineup ${lineupId}`,
@@ -124,45 +124,18 @@ export class StratsClient {
     return lineup;
   }
 
-  private async get<T>(path: string): Promise<T> {
-    await this.throttle();
-    let response: Response;
+  private async validated<T>(
+    path: string,
+    schema: { safeParse: (value: unknown) => { success: boolean } },
+  ): Promise<T> {
     try {
-      response = await this.fetcher(`${this.baseUrl}${path}`, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-    } catch {
-      throw new StratsApiError("Strats.gg lineup request timed out or was unavailable", null, "unavailable");
+      const body = await this.transport.json(`${this.baseUrl}${path}`, { Accept: "application/json" });
+      if (!schema.safeParse(body).success) throw new StratsApiError("Invalid Strats.gg fields", 200, "invalid-payload");
+      return body as T;
+    } catch (error) {
+      if (error instanceof ProviderTransportError)
+        throw new StratsApiError("Strats.gg request failed", error.status, error.code, error.retryAt);
+      throw error;
     }
-
-    let body: T;
-    try {
-      body = (await response.json()) as T;
-    } catch {
-      throw new StratsApiError("Strats.gg returned a non-JSON response", response.status, "invalid-payload");
-    }
-    if (!response.ok) {
-      const message = `Strats.gg request failed with HTTP ${response.status}`;
-      throw new StratsApiError(message, response.status, classify(response.status));
-    }
-    return body;
   }
-
-  private async throttle(): Promise<void> {
-    const intervalMs = Math.ceil(60_000 / this.requestsPerMinute);
-    const turn = this.throttleChain.then(async () => {
-      const waitMs = Math.max(0, this.nextRequestAt - Date.now());
-      if (waitMs) await Bun.sleep(waitMs);
-      this.nextRequestAt = Date.now() + intervalMs;
-    });
-    this.throttleChain = turn.catch(() => undefined);
-    await turn;
-  }
-}
-
-function classify(status: number): StratsFailureCode {
-  if (status === 404) return "not-found";
-  if (status >= 500) return "upstream-failure";
-  return "invalid-payload";
 }

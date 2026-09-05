@@ -1,20 +1,37 @@
 #!/usr/bin/env bun
+import { withRequestContext } from "./request-context";
 
-import { McpServer } from "@modelcontextprotocol/server";
+import {
+  McpServer,
+  isCallToolResult,
+  type StandardSchemaWithJSON,
+  type ToolAnnotations,
+  type ToolCallback,
+  type ServerContext,
+} from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import * as z from "zod/v4";
 
 import { startHttpServer } from "./http";
 import { actionableError } from "./errors";
 import { handleCliArgs, serverInfo, httpPort } from "./cli";
+import { ContentRuntime } from "./content-runtime";
 import { LineupsRuntime, type LineupSide } from "./lineups-runtime";
-import { findAgentKnowledge, findMapKnowledge, findWeaponKnowledge, valorantTerminology } from "./game-knowledge";
+import {
+  gameKnowledge,
+  findAgentKnowledge,
+  findMapKnowledge,
+  findWeaponKnowledge,
+  valorantTerminology,
+} from "./game-knowledge";
 import { renderTacticalSnapshotImage } from "./round-renderer";
 import type { DuelReplay, ScoreTiming } from "./round-intelligence";
 import { ValorantRuntime, type ValorantPlatform, type ValorantRegion } from "./valorant-runtime";
 
 export type ValorantToolRuntime = Pick<
   ValorantRuntime,
+  | "getRankHistory"
+  | "compareMatches"
   | "getPlayer"
   | "listMatches"
   | "getMatch"
@@ -29,6 +46,7 @@ export type ValorantToolRuntime = Pick<
   | "getDuelReplay"
   | "getTacticalSnapshot"
   | "getRawMatch"
+  | "getPatchNotes"
 >;
 
 const regionSchema = z
@@ -88,16 +106,65 @@ const toolAnnotations = {
   openWorldHint: true,
 } as const;
 
+const defaultAuxiliaryRuntimes = new WeakMap<
+  ValorantToolRuntime,
+  { lineups: LineupsRuntime; content: ContentRuntime }
+>();
+function auxiliaryRuntimes(runtime: ValorantToolRuntime) {
+  let shared = defaultAuxiliaryRuntimes.get(runtime);
+  if (!shared) {
+    shared = { lineups: new LineupsRuntime(), content: new ContentRuntime() };
+    defaultAuxiliaryRuntimes.set(runtime, shared);
+  }
+  return shared;
+}
+
 export function createValorantMcpServer(
   runtime: ValorantToolRuntime,
-  lineupsRuntime: LineupsRuntime = new LineupsRuntime(),
+  lineupsRuntime: LineupsRuntime = auxiliaryRuntimes(runtime).lineups,
+  contentRuntime: ContentRuntime = auxiliaryRuntimes(runtime).content,
 ): McpServer {
   const server = new McpServer(serverInfo, {
     instructions:
       "Read-only post-match analysis. Use explicit player IDs and exact returned match IDs. Listing stays live; opening a match saves it locally. Treat kill positions as discrete snapshots, never continuous movement or proven visibility. Cite round evidence and distinguish observed facts from inferences.",
   });
 
-  server.registerTool(
+  function registerTool<Output extends StandardSchemaWithJSON, Input extends StandardSchemaWithJSON>(
+    name: string,
+    config: {
+      title: string;
+      description: string;
+      inputSchema: Input;
+      outputSchema: Output;
+      annotations: ToolAnnotations;
+    },
+    callback: ToolCallback<Input>,
+  ) {
+    const wrapped = async (args: StandardSchemaWithJSON.InferOutput<Input>, context: ServerContext) =>
+      withRequestContext(AbortSignal.any([context.mcpReq.signal, AbortSignal.timeout(30_000)]), async (request) => {
+        const response = await callback(args, context);
+        if (!isCallToolResult(response) || !response.structuredContent) return response;
+        const structuredContent = {
+          ...response.structuredContent,
+          response_generated_at: now(),
+          provider_requests: request.traces,
+        };
+        const json =
+          args !== null && typeof args === "object" && "response_format" in args && args.response_format === "json";
+        return {
+          ...response,
+          structuredContent,
+          content: json
+            ? response.content.map((block) =>
+                block.type === "text" ? { ...block, text: JSON.stringify(structuredContent) } : block,
+              )
+            : response.content,
+        };
+      });
+    return server.registerTool(name, config, wrapped as ToolCallback<Input>);
+  }
+
+  registerTool(
     "valorant_get_player",
     {
       title: "Get Valorant player",
@@ -133,7 +200,7 @@ For recent games use valorant_list_matches instead.`,
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_list_matches",
     {
       title: "List recent Valorant matches",
@@ -141,7 +208,7 @@ For recent games use valorant_list_matches instead.`,
 
 Each row contains an index and exact match_id. When the user says "open the second game", take match_id from index 2 and pass it to valorant_get_match, valorant_analyze_match, or valorant_get_round. Never treat the ordinal itself as a match ID.
 
-Args include an optional Henrik queue/mode filter such as competitive, unrated, swiftplay, or deathmatch. Default limit is 5, maximum 20.
+Args include optional Henrik mode and map filters, plus a zero-based start offset. Default limit is 5, maximum 20. Returned IDs are deduplicated; a full window means more results are unknown, not confirmed. Use window.nextStart to request the next window.
 
 Listing stays live and does not persist any returned match. Only a later detail-dependent call for one exact match_id may save that selected match.`,
       inputSchema: z
@@ -149,7 +216,15 @@ Listing stays live and does not persist any returned match. Only a later detail-
           player: playerSchema,
           region: regionSchema,
           platform: platformSchema,
-          limit: z.number().int().min(1).max(20).default(5).describe("Number of newest matches to return."),
+          limit: z.number().int().min(1).max(20).default(5).describe("Number of provider rows to request."),
+          map: z.string().trim().min(1).max(80).optional().describe("Optional Henrik map filter, such as Haven."),
+          start: z
+            .number()
+            .int()
+            .min(0)
+            .max(1000)
+            .default(0)
+            .describe("Zero-based provider window offset; use window.nextStart."),
           mode: z
             .string()
             .trim()
@@ -167,7 +242,7 @@ Listing stays live and does not persist any returned match. Only a later detail-
       }),
       annotations: toolAnnotations,
     },
-    async ({ player, region, platform, limit, mode, response_format }) =>
+    async ({ player, region, platform, limit, mode, map, start, response_format }) =>
       withToolErrors(async () => {
         const matches = await runtime.listMatches({
           player,
@@ -175,13 +250,91 @@ Listing stays live and does not persist any returned match. Only a later detail-
           platform: platform as ValorantPlatform,
           limit,
           mode,
+          map,
+          start,
         });
         const output = { kind: "valorant_match_list" as const, generated_at: now(), ...matches };
         return result(output, formatMatches(output), response_format);
       }),
   );
 
-  server.registerTool(
+  registerTool(
+    "valorant_get_rank_history",
+    {
+      title: "Get recent Valorant RR history",
+      description:
+        "Read the explicit player's recent provider-reported rank changes, match references, dates, season, refunded RR and derank protection. Bounded to 50 results. No persistence or automatic match opening. providerElo is not Riot's hidden matchmaking rating.",
+      inputSchema: z
+        .object({
+          player: playerSchema,
+          region: regionSchema,
+          platform: platformSchema,
+          limit: z.number().int().min(1).max(50).default(10),
+          response_format: responseFormatSchema,
+        })
+        .strict(),
+      outputSchema: z.looseObject({
+        kind: z.literal("valorant_rank_history"),
+        history: z.array(z.looseObject({ matchId: z.string() })),
+      }),
+      annotations: toolAnnotations,
+    },
+    async ({ player, region, platform, limit, response_format }) =>
+      withToolErrors(async () => {
+        const history = await runtime.getRankHistory({ player, region, platform, limit });
+        const output = { kind: "valorant_rank_history" as const, generated_at: now(), ...history };
+        const text = [
+          "## Recent RR history",
+          ...history.history.map(
+            (row) =>
+              `- ${row.changedAt ?? "Unknown date"} · ${row.tier.name} ${row.rr} RR (${row.rrDelta >= 0 ? "+" : ""}${row.rrDelta}) · ${row.map.name} · match ${row.matchId}${row.refundedRr ? ` · refunded ${row.refundedRr} RR` : ""}${row.wasDerankProtected ? " · derank protected" : ""}`,
+          ),
+          ...history.limitations,
+        ].join("\n");
+        return result(output, text, response_format);
+      }),
+  );
+
+  registerTool(
+    "valorant_compare_matches",
+    {
+      title: "Compare explicitly selected Valorant matches",
+      description:
+        "Compare scoreboard metrics for one explicit player across two to five supplied match IDs or Tracker match URLs. Opens and may cache only those IDs. Returns per-match evidence and context groups by map/mode/patch/role. Never expands history. A selected sample cannot establish skill trends or causation.",
+      inputSchema: z
+        .object({
+          player: playerSchema,
+          match_ids: z.array(matchIdSchema).min(2).max(5),
+          region: regionSchema,
+          platform: platformSchema,
+          response_format: responseFormatSchema,
+        })
+        .strict(),
+      outputSchema: z.looseObject({
+        kind: z.literal("valorant_selected_comparison"),
+        matches: z.array(z.looseObject({ matchId: z.string() })),
+      }),
+      annotations: toolAnnotations,
+    },
+    async ({ player, match_ids, region, platform, response_format }) =>
+      withToolErrors(async () => {
+        const comparison = await runtime.compareMatches({ player, matchIds: match_ids, region, platform });
+        return result(
+          { kind: "valorant_selected_comparison" as const, generated_at: now(), ...comparison },
+          [
+            "## Selected-match comparison",
+            ...comparison.matches.map(
+              (row) =>
+                `- ${row.matchId} · ${row.map ?? "Unknown map"} · ${row.mode} · patch ${row.patch ?? "unknown"} · ${row.agent ?? "Unknown agent"}: ${row.metrics.kills ?? "?"}/${row.metrics.deaths ?? "?"}/${row.metrics.assists ?? "?"}, ACS ${row.metrics.acs ?? "unknown"}`,
+            ),
+            ...comparison.limitations,
+          ].join("\n"),
+          response_format,
+        );
+      }),
+  );
+
+  registerTool(
     "valorant_get_match",
     {
       title: "Get Valorant match",
@@ -194,6 +347,12 @@ Use the exact match_id from valorant_list_matches. Set focus_player to the Riot 
           region: regionSchema,
           platform: platformSchema,
           focus_player: focusPlayerSchema,
+          refresh: z
+            .boolean()
+            .default(false)
+            .describe(
+              "Explicitly refresh only this match from Henrik, with a 60-second cooldown. Preserves richer saved evidence.",
+            ),
           response_format: responseFormatSchema,
         })
         .strict(),
@@ -205,20 +364,21 @@ Use the exact match_id from valorant_list_matches. Set focus_player to the Riot 
       }),
       annotations: toolAnnotations,
     },
-    async ({ match_id, region, platform, focus_player, response_format }) =>
+    async ({ match_id, region, platform, focus_player, refresh, response_format }) =>
       withToolErrors(async () => {
         const projection = await runtime.getMatchProjection({
           matchId: match_id,
           region: region as ValorantRegion,
           platform: platform as ValorantPlatform,
           focusPlayer: focus_player,
+          refresh,
         });
         const output = { kind: "valorant_match" as const, generated_at: now(), ...projection };
         return result(output, formatMatch(output), response_format);
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_analyze_match",
     {
       title: "Analyze Valorant match",
@@ -256,45 +416,78 @@ Returns deterministic turning points plus performance, economy, opponent damage,
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_get_match_timeline",
     {
       title: "Get objective Valorant match timeline",
       description: `Return one compact evidence row per round for objective whole-match analysis.
 
-Use this after selecting an exact match when the user asks what they did wrong across the game. Each row separates observed facts from supported inference and includes score, side, outcome, opening duel, focus kills/deaths, objectives, decisive events, utility counts, and evidence limits. This is the preferred one-call input for blunt round-by-round review; drill into a cited death with valorant_review_position.`,
+Use this after selecting an exact match when the user asks what they did wrong across the game. Each row separates observed facts from supported inference and includes score, side, outcome, opening duel, focus kills/deaths, objectives, decisive event references, and evidence limits. This is the preferred one-call input for blunt round-by-round review; drill into a cited death with valorant_review_position.`,
       inputSchema: z
         .object({
           match_id: matchIdSchema,
           region: regionSchema,
           platform: platformSchema,
           focus_player: focusPlayerSchema,
+          round_from: z.number().int().min(1).max(200).optional(),
+          round_to: z.number().int().min(1).max(200).optional(),
+          limit: z.number().int().min(1).max(30).default(30),
           response_format: responseFormatSchema,
         })
         .strict(),
       outputSchema: z.looseObject({
         kind: z.literal("valorant_match_timeline"),
         generated_at: z.string(),
-        rounds: z.array(z.unknown()),
+        version: z.literal("match-timeline-v2"),
+        rounds: z.array(
+          z
+            .object({
+              roundNumber: z.number().int(),
+              opening: z.string().nullable(),
+              objective: z.string().nullable(),
+              decisiveEvent: z.string().nullable(),
+              keyMoments: z.array(z.string()),
+              observedFacts: z.array(z.string()),
+              supportedInferences: z.array(z.string()),
+            })
+            .passthrough(),
+        ),
+        events: z.record(
+          z.string(),
+          z
+            .object({
+              id: z.string(),
+              round: z.number().int(),
+              kind: z.enum(["kill", "plant", "defuse"]),
+              timeInRoundMs: z.number().nullable(),
+              actor: z.string(),
+              target: z.string().nullable(),
+              fact: z.string(),
+            })
+            .passthrough(),
+        ),
         summary: z.unknown(),
         cache: z.unknown(),
       }),
       annotations: toolAnnotations,
     },
-    async ({ match_id, region, platform, focus_player, response_format }) =>
+    async ({ match_id, region, platform, focus_player, round_from, round_to, limit, response_format }) =>
       withToolErrors(async () => {
         const timeline = await runtime.getMatchTimeline({
           matchId: match_id,
           region: region as ValorantRegion,
           platform: platform as ValorantPlatform,
           focusPlayer: focus_player,
+          roundFrom: round_from,
+          roundTo: round_to,
+          limit,
         });
         const output = { kind: "valorant_match_timeline" as const, generated_at: now(), ...timeline };
         return result(output, formatMatchTimeline(output), response_format);
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_get_round",
     {
       title: "Get Valorant round evidence",
@@ -334,7 +527,7 @@ Use this after valorant_get_match or valorant_analyze_match when the user names 
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_explain_round",
     {
       title: "Explain a Valorant round",
@@ -391,7 +584,7 @@ Map callouts use the nearest documented anchor rather than invented polygons. Si
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_list_round_kills",
     {
       title: "List a Valorant round's kills",
@@ -470,7 +663,7 @@ The round may be selected by one-based round_number or a focus-perspective score
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_review_deaths",
     {
       title: "Review player deaths",
@@ -567,7 +760,7 @@ When the user asks to browse deaths, show the returned image and offer navigatio
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_review_position",
     {
       title: "Review death position relative to teammates",
@@ -642,7 +835,7 @@ Use this for questions such as "When I died here, where were my teammates?", "Wa
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_get_game_knowledge",
     {
       title: "Get Valorant game knowledge",
@@ -668,6 +861,13 @@ Use this when a match explanation needs ability names/roles, map callout anchors
         const output = {
           kind: "valorant_game_knowledge" as const,
           generated_at: now(),
+          response_generated_at: now(),
+          knowledge_generated_at: gameKnowledge().generatedAt,
+          knowledge_version: gameKnowledge().version,
+          content_manifest: gameKnowledge().contentVersion?.manifestId ?? null,
+          locale: gameKnowledge().locale ?? "en-US",
+          source_updated_at: null,
+          historical_match_patch: null,
           agent: agent ? findAgentKnowledge(agent) : null,
           map: map ? findMapKnowledge(map) : null,
           weapon: weapon ? findWeaponKnowledge(weapon) : null,
@@ -679,17 +879,184 @@ Use this when a match explanation needs ability names/roles, map callout anchors
       }),
   );
 
-  server.registerTool(
+  registerTool(
+    "valorant_get_game_content",
+    {
+      title: "Get current public Valorant content",
+      description:
+        "Explicit public metadata lookup for one agent, map or weapon. Uses a bundled name or a Valorant-API UUID and a per-UUID endpoint, never the full skin/weapon catalog. fresh=true contacts unofficial Valorant-API; fresh=false stays offline. Returns content/build/source times, bounded selected fields and a disclosed bundled fallback. Current content does not establish the patch or competitive map rotation of an old match.",
+      inputSchema: z
+        .object({
+          kind: z.enum(["agent", "map", "weapon"]),
+          query: z.string().trim().min(1).max(160),
+          locale: z
+            .string()
+            .regex(/^[a-z]{2}-[A-Z]{2}$/)
+            .default("en-US"),
+          fresh: z.boolean().default(true),
+          response_format: responseFormatSchema,
+        })
+        .strict(),
+      outputSchema: z.looseObject({
+        kind: z.literal("valorant_game_content"),
+        data: z.looseObject({ uuid: z.string(), name: z.string() }),
+        source: z.string(),
+        source_fetched_at: z.string().nullable(),
+        content_manifest: z.string().nullable(),
+      }),
+      annotations: toolAnnotations,
+    },
+    async ({ kind, query, locale, fresh, response_format }) =>
+      withToolErrors(async () => {
+        const content = await contentRuntime.getContent({ kind, query, locale, fresh });
+        const output = { ...content, content_kind: kind, kind: "valorant_game_content" as const };
+        return result(
+          output,
+          `${content.data.name} · ${content.source} · ${content.locale}\n${content.warning ?? "Current catalog content; applicability to an old match patch is unknown."}`,
+          response_format,
+        );
+      }),
+  );
+
+  registerTool(
+    "valorant_get_game_asset",
+    {
+      title: "Get one Valorant game asset",
+      description:
+        "Return one bounded native MCP PNG for an explicitly named agent, map or weapon. Bundled artwork is the default. Set fresh=true to retrieve a public Valorant-API asset; an agent ability slot/name requires fresh=true. Maximum 512 pixels and 256 KiB PNG. No automatic repository asset updates occur.",
+      inputSchema: z
+        .object({
+          kind: z.enum(["agent", "map", "weapon"]),
+          query: z.string().trim().min(1).max(160),
+          ability: z.string().trim().min(1).max(160).optional(),
+          locale: z
+            .string()
+            .regex(/^[a-z]{2}-[A-Z]{2}$/)
+            .default("en-US"),
+          fresh: z.boolean().default(false),
+          size: z.number().int().min(64).max(512).default(256),
+        })
+        .strict(),
+      outputSchema: z.looseObject({
+        kind: z.literal("valorant_game_asset"),
+        name: z.string(),
+        uuid: z.string(),
+        source: z.string(),
+        width: z.number().int(),
+        height: z.number().int(),
+        sha256: z.string(),
+        bytes: z.number().int(),
+      }),
+      annotations: toolAnnotations,
+    },
+    async ({ kind, query, ability, locale, fresh, size }) =>
+      withToolErrors(async () => {
+        const asset = await contentRuntime.getAsset({ kind, query, ability, locale, fresh, size });
+        const output = {
+          kind: "valorant_game_asset" as const,
+          name: asset.data.name,
+          uuid: asset.data.uuid,
+          ability: ability ?? null,
+          source: asset.assetSource,
+          source_url: asset.source_url,
+          source_fetched_at: asset.source_fetched_at,
+          content_manifest: asset.content_manifest,
+          warning: asset.warning,
+          width: asset.image.width,
+          height: asset.image.height,
+          sha256: asset.image.hash,
+          bytes: Buffer.from(asset.image.data, "base64").length,
+        };
+        return {
+          structuredContent: output,
+          content: [
+            {
+              type: "text" as const,
+              text: `${output.name}${ability ? ` · ${ability}` : ""} · ${output.source}${output.warning ? `\n${output.warning}` : ""}`,
+            },
+            { type: "image" as const, data: asset.image.data, mimeType: asset.mimeType },
+          ],
+        };
+      }),
+  );
+
+  registerTool(
+    "valorant_get_patch_notes",
+    {
+      title: "Get Valorant patch notes",
+      description:
+        "Discover patch publications through Henrik, ordered by publication date and patch identity. Request a patch such as 13.05 or latest, locale, optional heading filters, and up to three articles. Returns canonical Riot links, bounded sections, platform headings and timing caveats. Nullable article bodies remain metadata-only. Offline fallback identifies known bundled publications and never claims to verify the latest patch.",
+      inputSchema: z
+        .object({
+          patch: z
+            .string()
+            .regex(/^(latest|\d{1,2}\.\d{1,2})$/)
+            .default("latest"),
+          locale: z
+            .string()
+            .regex(/^[a-z]{2}-[A-Z]{2}$/)
+            .default("en-US"),
+          sections: z.array(z.string().trim().min(1).max(80)).max(6).optional(),
+          limit: z.number().int().min(1).max(3).default(1),
+          response_format: responseFormatSchema,
+        })
+        .strict(),
+      outputSchema: z.looseObject({
+        kind: z.literal("valorant_patch_notes"),
+        source: z.string(),
+        latest_scope: z.string(),
+        articles: z.array(
+          z.looseObject({
+            title: z.string(),
+            patch: z.string(),
+            canonical_url: z.string().url(),
+            published_at: z.string(),
+            sections: z.array(
+              z.object({
+                heading: z.string(),
+                platform: z.enum(["all", "pc", "console", "unspecified"]),
+                text: z.string(),
+                truncated: z.boolean(),
+                timing: z.literal("may-include-future-announcements"),
+              }),
+            ),
+          }),
+        ),
+      }),
+      annotations: toolAnnotations,
+    },
+    async ({ patch, locale, sections, limit, response_format }) =>
+      withToolErrors(async () => {
+        const notes = await runtime.getPatchNotes({ patch, locale, sections, limit });
+        const output = { kind: "valorant_patch_notes" as const, ...notes };
+        return result(
+          output,
+          [
+            ...notes.articles.map(
+              (article) =>
+                `[${article.title}](${article.canonical_url}) · ${article.published_at}\n${article.sections.map((section) => `${section.heading} (${section.platform}): ${section.text}`).join("\n")}\n${article.warning ?? ""}`,
+            ),
+            notes.warning ?? "",
+          ].join("\n\n"),
+          response_format,
+        );
+      }),
+  );
+
+  registerTool(
     "valorant_get_raw_match",
     {
       title: "Get raw Henrik match data",
-      description: `Return an exact raw section of one saved-or-live Henrik match payload for verification and edge-case investigation.
+      description: `Return a bounded page of an exact raw section of one saved-or-live Henrik match payload for verification and edge-case investigation.
 
-Use this only when normalized evidence needs to be double-checked. Select metadata, players, teams, rounds, or kills before requesting all. Raw data can be large and uses provider field names and zero/one-based conventions; prefer normalized tools for ordinary answers. The payload contains match participants but never the Henrik API key.`,
+Use this only when normalized evidence needs to be double-checked. Select metadata, players, teams, rounds, or kills before requesting all. Use path (JSON pointer relative to section) to open $expand fields; offset/limit page entries (or characters for strings). Version raw-page-v2 never truncates JSON. Raw data can be large and uses provider field names and zero/one-based conventions; prefer normalized tools for ordinary answers. The payload contains match participants but never the Henrik API key.`,
       inputSchema: z
         .object({
           match_id: matchIdSchema,
           section: z.enum(["metadata", "players", "teams", "rounds", "kills", "all"]).default("metadata"),
+          path: z.string().max(1024).default(""),
+          offset: z.number().int().min(0).max(1000000).default(0),
+          limit: z.number().int().min(1).max(100).default(20),
           region: regionSchema,
           platform: platformSchema,
           response_format: responseFormatSchema,
@@ -704,11 +1071,14 @@ Use this only when normalized evidence needs to be double-checked. Select metada
       }),
       annotations: toolAnnotations,
     },
-    async ({ match_id, section, region, platform, response_format }) =>
+    async ({ match_id, section, path, offset, limit, region, platform, response_format }) =>
       withToolErrors(async () => {
         const raw = await runtime.getRawMatch({
           matchId: match_id,
           section,
+          path,
+          offset,
+          limit,
           region: region as ValorantRegion,
           platform: platform as ValorantPlatform,
         });
@@ -717,7 +1087,7 @@ Use this only when normalized evidence needs to be double-checked. Select metada
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_render_round",
     {
       title: "Render one Valorant duel",
@@ -830,13 +1200,13 @@ The round can be selected by round_number or score. Use valorant_list_round_kill
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_search_lineups",
     {
       title: "Search Valorant lineups",
       description: `Search community lineups on Strats.gg for one agent, optionally limited to one map and side, and filtered by ability, difficulty tier, or a position phrase such as "b main".
 
-The agent is required so searches stay bounded; omit the map to search every map for that agent. The side is the team you execute from, default attacker. Each result reports the standing position as map percentages, the ability, difficulty label (Essential/Useful/Niche mapping to easy/medium/hard), community views, a YouTube video, and screenshot and map image URLs.
+The agent is required so searches stay bounded; omit the map to search up to map_budget maps (default 4, maximum 10) with explicit coverage. The side is the team you execute from, default attacker. Each result reports the standing position as map percentages, the ability, difficulty label (Essential/Useful/Niche mapping to easy/medium/hard), community views, a YouTube video, and screenshot and map image URLs.
 
 Examples:
 - "Give me a Sova lineup on Ascent from B Main while attacking" -> agent="Sova", map="Ascent", side="attacker", query="b main"
@@ -860,7 +1230,11 @@ Lineups are community-submitted; titles and standing positions are the position 
             .min(1)
             .max(80)
             .optional()
-            .describe("Map to search, for example Ascent. Omit to search every map for the agent."),
+            .describe(
+              "Map to search, for example Ascent. Omit for a bounded cross-map search; coverage reports skipped/failed maps.",
+            ),
+          map_budget: z.number().int().min(1).max(10).default(4),
+          sort: z.enum(["views", "recent", "relevance"]).default("views"),
           side: z
             .enum(["attacker", "defender"])
             .default("attacker")
@@ -905,7 +1279,7 @@ Lineups are community-submitted; titles and standing positions are the position 
       }),
       annotations: toolAnnotations,
     },
-    async ({ agent, map, side, ability, level, query, limit, response_format }) =>
+    async ({ agent, map, side, ability, level, query, limit, map_budget, sort, response_format }) =>
       withToolErrors(async () => {
         const search = await lineupsRuntime.searchLineups({
           agent,
@@ -915,13 +1289,16 @@ Lineups are community-submitted; titles and standing positions are the position 
           level,
           query,
           limit,
+          mapBudget: map_budget,
+          sort,
         });
         const output = {
           kind: "valorant_lineup_search" as const,
           generated_at: now(),
           agent: search.matches[0]?.agent ?? agent,
-          map: map?.trim() || "all maps",
+          map: map?.trim() || "bounded cross-map search",
           side,
+          ...search,
           maps_searched: search.maps_searched,
           matches: search.matches,
         };
@@ -929,7 +1306,7 @@ Lineups are community-submitted; titles and standing positions are the position 
       }),
   );
 
-  server.registerTool(
+  registerTool(
     "valorant_get_lineup",
     {
       title: "Get one Valorant lineup",
@@ -971,7 +1348,9 @@ function result<T extends JsonObject>(output: T, markdown: string, format: "mark
         text:
           text.length <= 60_000
             ? text
-            : `${text.slice(0, 59_000)}\n\n[Output truncated. Request a narrower match or round view.]`,
+            : format === "json"
+              ? JSON.stringify(output)
+              : `${text.slice(0, 59_000)}\n\n[Output truncated. Request a narrower match or round view.]`,
       },
     ],
     structuredContent: output,
@@ -1016,6 +1395,11 @@ function formatMatches(output: JsonObject): string {
   const input = output.input as JsonObject;
   const matches = output.matches as JsonObject[];
   const lines = [`## Recent matches for ${player.riotId}`, ""];
+  const window = output.window as JsonObject | undefined;
+  if (window)
+    lines.push(
+      `Provider window starts at ${window.start}; returned ${window.returnedUnique} unique matches from ${window.providerRows} rows.${window.nextStart !== null ? ` More results are unknown; next start=${window.nextStart}.` : " Provider returned a short window."}${window.map ? ` Map filter: ${window.map}.` : ""}`,
+    );
   if (input.source === "tracker-profile") {
     lines.push(
       `Tracker hints applied: platform=${input.appliedPlatform}${input.appliedPlaylist ? `, playlist=${input.appliedPlaylist}` : ""}.`,
@@ -1089,15 +1473,17 @@ function formatMatchTimeline(output: JsonObject): string {
     `Opening deaths: ${summary.openingDeaths} · Untraded deaths: ${summary.untradedDeaths}`,
   ];
   for (const round of rounds) {
-    const opening = round.opening as JsonObject | null;
-    const objective = round.objective as JsonObject | null;
+    const events = output.events as Record<string, JsonObject>;
+    const participants = output.participants as Record<string, JsonObject>;
+    const opening = round.opening ? events[String(round.opening)] : null;
+    const objective = round.objective ? events[String(round.objective)] : null;
     const winner = round.winner as JsonObject;
     const observed = round.observedFacts as string[];
     const inferences = round.supportedInferences as string[];
     let event = "no recorded opening kill";
     if (opening?.target) {
-      const actor = opening.actor as JsonObject;
-      const target = opening.target as JsonObject;
+      const actor = participants[String(opening.actor)]!;
+      const target = participants[String(opening.target)]!;
       event = `${actor.agentName ?? actor.gameName} killed ${target.agentName ?? target.gameName} at ${time(opening.timeInRoundMs)}`;
     }
     lines.push(
@@ -1325,17 +1711,19 @@ function formatGameKnowledge(output: JsonObject): string {
 }
 
 function formatRawMatch(output: JsonObject): string {
-  const serialized = JSON.stringify(output.data, null, 2);
-  const clipped =
-    serialized.length > 58_000
-      ? `${serialized.slice(0, 58_000)}\n... [raw section truncated; request a narrower section]`
-      : serialized;
-  return `## Raw Henrik ${output.section} · ${output.match_id}\n\n\u0060\u0060\u0060json\n${clipped}\n\u0060\u0060\u0060`;
+  return `## Raw Henrik ${output.section} · ${output.match_id}\n\n${JSON.stringify({ data: output.data, pagination: output.pagination, expandable: output.expandable }, null, 2)}`;
 }
 
 function formatLineupSearch(output: JsonObject): string {
   const matches = output.matches as JsonObject[];
   const lines = [`## ${output.agent} lineups · ${output.map} (${output.side})`, ""];
+  const coverage = output.coverage as
+    { succeeded: string[]; failed: Array<{ map: string; code: string }>; skipped: string[] } | undefined;
+  if (coverage)
+    lines.push(
+      `Maps completed: ${coverage.succeeded.join(", ") || "none"}. Failed: ${coverage.failed.map((row) => `${row.map} (${row.code})`).join(", ") || "none"}. Outside budget: ${coverage.skipped.join(", ") || "none"}.`,
+    );
+  lines.push("Community content; validation against the current patch is unknown.");
   if (!matches.length) {
     lines.push(
       "No community lineups matched the filters. Try removing the ability, level, or position query, or search the other side.",

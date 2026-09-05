@@ -1,3 +1,5 @@
+import { killRoundNumber } from "../services/match-kill-round";
+import { matchCompleteness } from "../services/match-completeness";
 import { ValorantInputError } from "./errors";
 import { normalizeMapSpatialPosition } from "../domain/map-spatial-resources";
 import type {
@@ -193,10 +195,24 @@ export type DeathMoment = {
   explanation: string;
 };
 
+export type TimelineEventRef = {
+  id: string;
+  round: number;
+  kind: RoundTimelineEvent["kind"];
+  timeInRoundMs: number | null;
+  actor: string;
+  target: string | null;
+  site: string | null;
+  fact: string;
+};
 export type MatchTimeline = {
+  version: "match-timeline-v2";
   matchId: string;
   map: string | null;
+  matchPatch: string | null;
   focus: PlayerRef | null;
+  participants: Record<string, PlayerRef>;
+  events: Record<string, TimelineEventRef>;
   rounds: Array<{
     roundNumber: number;
     scoreBefore: string;
@@ -204,28 +220,27 @@ export type MatchTimeline = {
     side: "attack" | "defense" | null;
     outcome: "win" | "loss" | "unknown";
     winner: RoundIntelligence["winner"];
-    focusKills: number;
-    focusDeaths: number;
-    focusUntradedDeaths: number;
-    opening: RoundTimelineEvent | null;
-    objective: RoundTimelineEvent | null;
-    decisiveEvent: RoundTimelineEvent | null;
-    keyMoments: RoundTimelineEvent[];
-    abilityContext: RoundIntelligence["abilityContext"];
+    focusKills: number | null;
+    focusDeaths: number | null;
+    focusUntradedDeaths: number | null;
+    opening: string | null;
+    objective: string | null;
+    decisiveEvent: string | null;
+    keyMoments: string[];
     observedFacts: string[];
     supportedInferences: string[];
-    limitations: string[];
   }>;
   summary: {
     rounds: number;
     wins: number;
     losses: number;
     unknown: number;
-    focusKills: number;
-    focusDeaths: number;
-    openingDeaths: number;
-    untradedDeaths: number;
+    focusKills: number | null;
+    focusDeaths: number | null;
+    openingDeaths: number | null;
+    untradedDeaths: number | null;
   };
+  evidence: ReturnType<typeof matchCompleteness>;
   limitations: string[];
 };
 
@@ -275,26 +290,38 @@ export function roundScoreStates(detail: MatchDetail, focusPuuid: string | null 
   const order = detail.teams.map((team) => team.teamId);
   const focusTeamId = focusPuuid ? teamForPuuid(detail, focusPuuid) : null;
   const current = Object.fromEntries(order.map((teamId) => [teamId, 0])) as Record<string, number>;
+  let previousRound = 0;
+  let known = true;
   return [...detail.rounds]
     .sort((left, right) => left.number - right.number)
     .map((round) => {
+      const beforeKnown = known && round.number === previousRound + 1;
       const before = { ...current };
       for (const team of round.teamScores) current[team.teamId] = team.roundsWon;
       if (round.winningTeam && !round.teamScores.some((row) => sameTeam(row.teamId, round.winningTeam!))) {
         const canonical = order.find((teamId) => sameTeam(teamId, round.winningTeam!)) ?? round.winningTeam;
         current[canonical] = (current[canonical] ?? 0) + 1;
       }
+      known =
+        (beforeKnown && round.winningTeam !== null) ||
+        (order.every((id) => round.teamScores.some((t) => sameTeam(t.teamId, id))) &&
+          round.teamScores.reduce((sum, t) => sum + t.roundsWon, 0) === round.number);
+      previousRound = round.number;
       const after = { ...current };
       return {
         roundNumber: round.number,
         order,
         before,
         after,
-        beforeLabel: scoreLabel(order, before),
-        afterLabel: scoreLabel(order, after),
+        beforeLabel: beforeKnown ? scoreLabel(order, before) : "unknown",
+        afterLabel: known ? scoreLabel(order, after) : "unknown",
         focusTeamId,
-        focusBeforeLabel: focusTeamId ? perspectiveScoreLabel(order, before, focusTeamId) : null,
-        focusAfterLabel: focusTeamId ? perspectiveScoreLabel(order, after, focusTeamId) : null,
+        focusBeforeLabel: focusTeamId
+          ? beforeKnown
+            ? perspectiveScoreLabel(order, before, focusTeamId)
+            : "unknown"
+          : null,
+        focusAfterLabel: focusTeamId ? (known ? perspectiveScoreLabel(order, after, focusTeamId) : "unknown") : null,
       };
     });
 }
@@ -376,7 +403,10 @@ export function buildRoundIntelligence(
     decisiveEvent,
   ]).slice(0, 8);
   const observedFacts = observedRoundFacts(detail, round, score, timeline, focusPlayer, focusOutcome, decisiveEvent);
-  const supportedInferences = roundInferences(detail, round, timeline, focusPlayer, focusOutcome);
+  const supportedInferences =
+    detail.evidence && detail.evidence.kills.state !== "complete"
+      ? []
+      : roundInferences(detail, round, timeline, focusPlayer, focusOutcome);
   const roster = detail.teams.flatMap((team) => team.players);
   const abilityContext = round.playerStats.flatMap((stats) => {
     const player = roster.find((candidate) =>
@@ -410,7 +440,7 @@ export function buildRoundIntelligence(
     abilityContext,
     observedFacts,
     supportedInferences,
-    limitations: evidenceLimitations(timeline),
+    limitations: unique([...detail.warnings, ...evidenceLimitations(timeline)]),
   };
 }
 
@@ -664,7 +694,8 @@ export function reviewPlayerDeaths(
       ].slice(0, 4),
     },
     limitations: [
-      "Death review uses discrete kill-event snapshots, not continuous POV or movement.",
+      ...detail.warnings,
+      "Death review uses discrete kill-event snapshots, not continuous POV or movement. Counts describe recorded events; absent events do not prove zero deaths or no trade.",
       "Impact labels describe recorded man-advantage and trade timing; they do not assign blame or infer comms, intent, or utility not present in the feed.",
     ],
   };
@@ -672,15 +703,45 @@ export function reviewPlayerDeaths(
 
 export function buildMatchTimeline(detail: MatchDetail, focusPuuid: string | null): MatchTimeline {
   const focusPlayer = focusPuuid
-    ? (detail.teams.flatMap((team) => team.players).find((player) => player.puuid === focusPuuid) ?? null)
+    ? (detail.teams.flatMap((t) => t.players).find((p) => p.puuid === focusPuuid) ?? null)
     : null;
+  const participants: MatchTimeline["participants"] = {};
+  const events: MatchTimeline["events"] = {};
+  const evidence = detail.evidence ?? matchCompleteness(detail);
+  const completeKills = evidence.kills.state === "complete";
+  const limitations = new Set(detail.warnings);
+  const playerKey = (player: PlayerRef): string => {
+    const key =
+      Object.keys(participants).find(
+        (key) => participants[key]!.riotId === player.riotId && participants[key]!.puuid === player.puuid,
+      ) ?? `p${Object.keys(participants).length + 1}`;
+    participants[key] = player;
+    return key;
+  };
+  const eventRef = (event: RoundTimelineEvent | null, round: number): string | null => {
+    if (!event) return null;
+    events[event.id] ??= {
+      id: event.id,
+      round,
+      kind: event.kind,
+      timeInRoundMs: event.timeInRoundMs,
+      actor: playerKey(event.actor),
+      target: event.target ? playerKey(event.target) : null,
+      site: event.site,
+      fact:
+        event.kind === "kill"
+          ? `Recorded elimination${event.weaponName ? ` with ${event.weaponName}` : ""}.`
+          : `Recorded spike ${event.kind}.`,
+    };
+    return event.id;
+  };
   const rounds = [...detail.rounds]
-    .sort((left, right) => left.number - right.number)
+    .sort((a, b) => a.number - b.number)
     .map((round) => {
       const intelligence = buildRoundIntelligence(detail, round.number, focusPuuid);
-      const opening = intelligence.timeline.find((event) => event.kind === "kill") ?? null;
-      const objective =
-        intelligence.timeline.find((event) => event.kind === "plant" || event.kind === "defuse") ?? null;
+      intelligence.limitations.forEach((value) => limitations.add(value));
+      const opening = intelligence.timeline.find((e) => e.kind === "kill") ?? null;
+      const objective = intelligence.timeline.find((e) => e.kind === "plant" || e.kind === "defuse") ?? null;
       return {
         roundNumber: round.number,
         scoreBefore: intelligence.score.focusBeforeLabel ?? intelligence.score.beforeLabel,
@@ -688,43 +749,90 @@ export function buildMatchTimeline(detail: MatchDetail, focusPuuid: string | nul
         side: intelligence.focus?.side ?? null,
         outcome: intelligence.focus?.outcome ?? ("unknown" as const),
         winner: intelligence.winner,
-        focusKills: intelligence.focus?.kills ?? 0,
-        focusDeaths: intelligence.focus?.deaths ?? 0,
-        focusUntradedDeaths: focusPuuid
-          ? intelligence.timeline.filter(
-              (event) => event.kind === "kill" && event.target?.puuid === focusPuuid && !event.trade,
-            ).length
-          : 0,
-        opening,
-        objective,
-        decisiveEvent: intelligence.decisiveEvent,
-        keyMoments: intelligence.keyMoments,
-        abilityContext: intelligence.abilityContext,
-        observedFacts: intelligence.observedFacts,
-        supportedInferences: intelligence.supportedInferences,
-        limitations: intelligence.limitations,
+        focusKills: completeKills ? (intelligence.focus?.kills ?? null) : null,
+        focusDeaths: completeKills ? (intelligence.focus?.deaths ?? null) : null,
+        focusUntradedDeaths:
+          completeKills && focusPuuid
+            ? intelligence.timeline.filter((e) => e.kind === "kill" && e.target?.puuid === focusPuuid && !e.trade)
+                .length
+            : null,
+        opening: eventRef(opening, round.number),
+        objective: eventRef(objective, round.number),
+        decisiveEvent: eventRef(intelligence.decisiveEvent, round.number),
+        keyMoments: intelligence.keyMoments.slice(0, 4).map((e) => eventRef(e, round.number)!),
+        observedFacts: intelligence.observedFacts.slice(0, 2),
+        supportedInferences: completeKills ? intelligence.supportedInferences.slice(0, 1) : [],
       };
     });
+  limitations.add(
+    "Event references resolve in events and participants. Full facts, utility counts and snapshots are available through the round/death/position tools.",
+  );
+  limitations.add(
+    "Recorded positions are discrete kill-event snapshots, not continuous POV, movement, comms, intent, crosshair placement or proven visibility.",
+  );
+  if (!completeKills)
+    limitations.add(
+      "Kill coverage is incomplete or unknown. Focus totals and trade absence remain unknown; listed events are only recorded observations.",
+    );
+  const sum = (key: "focusKills" | "focusDeaths" | "focusUntradedDeaths") =>
+    focusPuuid && completeKills ? rounds.reduce((sum, r) => sum + (r[key] ?? 0), 0) : null;
   return {
+    version: "match-timeline-v2",
     matchId: detail.matchId,
     map: detail.mapName,
+    matchPatch: detail.patch,
     focus: focusPlayer ? playerRef(focusPlayer) : null,
+    participants,
+    events,
     rounds,
     summary: {
       rounds: rounds.length,
-      wins: rounds.filter((round) => round.outcome === "win").length,
-      losses: rounds.filter((round) => round.outcome === "loss").length,
-      unknown: rounds.filter((round) => round.outcome === "unknown").length,
-      focusKills: rounds.reduce((sum, round) => sum + round.focusKills, 0),
-      focusDeaths: rounds.reduce((sum, round) => sum + round.focusDeaths, 0),
-      openingDeaths: focusPuuid ? rounds.filter((round) => round.opening?.target?.puuid === focusPuuid).length : 0,
-      untradedDeaths: focusPuuid ? rounds.reduce((sum, round) => sum + round.focusUntradedDeaths, 0) : 0,
+      wins: rounds.filter((r) => r.outcome === "win").length,
+      losses: rounds.filter((r) => r.outcome === "loss").length,
+      unknown: rounds.filter((r) => r.outcome === "unknown").length,
+      focusKills: sum("focusKills"),
+      focusDeaths: sum("focusDeaths"),
+      openingDeaths:
+        focusPuuid && completeKills
+          ? rounds.filter((r) => r.opening && participants[events[r.opening]!.target ?? ""]?.puuid === focusPuuid)
+              .length
+          : null,
+      untradedDeaths: sum("focusUntradedDeaths"),
     },
-    limitations: unique([
-      ...detail.warnings,
-      ...rounds.flatMap((round) => round.limitations),
-      "The timeline is built from discrete match, round, and kill-event evidence; it does not reconstruct continuous POV, movement, comms, intent, or crosshair placement.",
-    ]),
+    evidence,
+    limitations: [...limitations],
+  };
+}
+
+export function pageMatchTimeline(
+  timeline: MatchTimeline,
+  input: { roundFrom?: number; roundTo?: number; limit?: number },
+) {
+  const candidates = timeline.rounds.filter(
+    (r) => r.roundNumber >= (input.roundFrom ?? 1) && r.roundNumber <= (input.roundTo ?? Infinity),
+  );
+  const selected: MatchTimeline["rounds"] = [];
+  const events: MatchTimeline["events"] = {};
+  for (const round of candidates.slice(0, input.limit ?? 30)) {
+    const refs = [round.opening, round.objective, round.decisiveEvent, ...round.keyMoments].filter(
+      (v): v is string => v !== null,
+    );
+    const additions = Object.fromEntries(refs.map((id) => [id, timeline.events[id]!]));
+    const proposed = { ...timeline, rounds: [...selected, round], events: { ...events, ...additions } };
+    if (selected.length && Buffer.byteLength(JSON.stringify(proposed)) > 44_000) break;
+    selected.push(round);
+    Object.assign(events, additions);
+  }
+  return {
+    ...timeline,
+    rounds: selected,
+    events,
+    pagination: {
+      totalRounds: timeline.rounds.length,
+      returned: selected.length,
+      nextRound: candidates[selected.length]?.roundNumber ?? null,
+      summaryScope: "whole-match" as const,
+    },
   };
 }
 
@@ -1169,6 +1277,7 @@ function rawKillForTimelineEvent(detail: MatchDetail, event: RoundTimelineEvent)
   return (
     detail.killEvents.find(
       (candidate) =>
+        killRoundNumber(detail, candidate) === Number(event.id.match(/^r(\d+)-/)?.[1]) &&
         candidate.timeInRoundMs === event.timeInRoundMs &&
         sameIdentity(candidate.killerPuuid, candidate.killerName, candidate.killerTag, event.actor) &&
         event.target !== null &&
@@ -1185,6 +1294,7 @@ function rawKillForEvidenceEvent(
   return (
     detail.killEvents.find(
       (candidate) =>
+        killRoundNumber(detail, candidate) === Number(event.id.match(/^r(\d+)-/)?.[1]) &&
         candidate.timeInRoundMs === event.timeInRoundMs &&
         sameIdentity(candidate.killerPuuid, candidate.killerName, candidate.killerTag, event.actor) &&
         sameIdentity(candidate.victimPuuid, candidate.victimName, candidate.victimTag, event.target!),

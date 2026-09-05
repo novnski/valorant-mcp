@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { SqliteMatchCache } from "../src/cache/sqlite-match-cache";
-import { normalizeMatchDetail } from "../src/services/match-detail-normalizer";
+
 import { providerMatch } from "../evals/fixtures/provider";
 
 const root = join(import.meta.dir, "..");
@@ -48,24 +48,44 @@ try {
     HENRIK_API_KEY: "package-smoke-not-a-real-key",
     VALORANT_MATCH_CACHE_PATH: join(temp, "matches.sqlite3"),
   } as Record<string, string>;
-  const cache = SqliteMatchCache.open(env.VALORANT_MATCH_CACHE_PATH!);
-  cache.saveMatch({
-    matchId: "cache-match-1",
-    platform: "pc",
-    region: "eu",
-    raw: providerMatch("cache-match-1"),
-    sourceEndpoint: "match-detail-v4",
-    baseProjection: normalizeMatchDetail(providerMatch("cache-match-1"), {
-      region: "eu",
-      platform: "pc",
-      source: "live",
-    })!,
-  });
-  cache.close();
+  const requestLog = join(temp, "provider-requests.jsonl");
+  const preload = join(temp, "provider-preload.ts");
+  const fixturePath = join(temp, "provider-fixtures.json");
+  await writeFile(fixturePath, JSON.stringify([providerMatch("cache-match-1"), providerMatch("cache-match-2")]));
+  await writeFile(requestLog, "");
+  await writeFile(
+    preload,
+    `
+import { appendFileSync, readFileSync } from "node:fs";
+const fixtures = JSON.parse(readFileSync(${JSON.stringify(fixturePath)}, "utf8"));
+globalThis.fetch = async (input) => {
+  const url = new URL(String(input));
+  if (url.origin !== "https://api.henrikdev.xyz") throw new Error("Unexpected network request in package smoke");
+  appendFileSync(${JSON.stringify(requestLog)}, JSON.stringify({ path: url.pathname }) + "\\n");
+  if (url.pathname.includes("/account/")) return Response.json({ status: 200, data: { puuid: "focus-puuid", name: "Focus", tag: "EU", region: "eu", platforms: ["pc"] } });
+  if (url.pathname.includes("/mmr-history/")) return Response.json({ status: 200, data: { history: [] } });
+  if (url.pathname.includes("/matches/")) return Response.json({ status: 200, data: fixtures.map((r) => ({ ...r, rounds: [], kills: [] })) });
+  if (url.pathname.includes("/match/")) return Response.json({ status: 200, data: fixtures.find((r) => r.metadata.match_id === url.pathname.split("/").at(-1)) });
+  throw new Error("Unexpected provider route in package smoke");
+};
+`,
+  );
+  env.HENRIK_REQUESTS_PER_MINUTE = "300";
+  function countMatches() {
+    const cache = SqliteMatchCache.open(env.VALORANT_MATCH_CACHE_PATH!);
+    try {
+      return cache.countMatches();
+    } finally {
+      cache.close();
+    }
+  }
+  async function detailRequests() {
+    return (await readFile(requestLog, "utf8")).split("\n").filter((line) => line.includes("/v4/match/")).length;
+  }
   const client = new Client({ name: "package-smoke", version: "1.0.0" });
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: [entry],
+    args: ["--preload", preload, entry],
     cwd: temp,
     env,
     stderr: "pipe",
@@ -77,7 +97,7 @@ try {
   try {
     await client.connect(transport);
     const listed = await client.listTools();
-    assert.equal(listed.tools.length, 15);
+    assert.equal(listed.tools.length, 20);
     for (const tool of listed.tools) {
       assert(tool.title && tool.description && tool.outputSchema);
       assert.equal(tool.inputSchema.additionalProperties, false);
@@ -90,6 +110,35 @@ try {
     });
     assert(!knowledge.isError, JSON.stringify(knowledge.content));
     assert.equal((knowledge.structuredContent as { agent: { name: string } }).agent.name, "Sova");
+    const content = await client.callTool({
+      name: "valorant_get_game_content",
+      arguments: { kind: "weapon", query: "Vandal", fresh: false },
+    });
+    assert(!content.isError);
+    assert.equal((content.structuredContent as Record<string, unknown>)?.source, "bundled");
+    const asset = await client.callTool({
+      name: "valorant_get_game_asset",
+      arguments: { kind: "agent", query: "Sova", size: 256 },
+    });
+    assert(!asset.isError);
+    assert.equal(asset.content.filter((block) => block.type === "image").length, 1);
+    const patch = await client.callTool({ name: "valorant_get_patch_notes", arguments: {} });
+    assert(!patch.isError);
+    assert.equal((patch.structuredContent as Record<string, unknown>)?.latest_scope, "known-bundled-publications");
+    const rrHistory = await client.callTool({
+      name: "valorant_get_rank_history",
+      arguments: { player: "Focus#EU", limit: 2 },
+    });
+    assert(!rrHistory.isError);
+    assert.equal(countMatches(), 0, "RR history persisted a match");
+    assert.equal(await detailRequests(), 0, "RR history opened a match");
+    const history = await client.callTool({
+      name: "valorant_list_matches",
+      arguments: { player: "Focus#EU", limit: 2 },
+    });
+    assert(!history.isError);
+    assert.equal(countMatches(), 0, "Listing persisted matches");
+    assert.equal(await detailRequests(), 0, "Listing expanded match details");
     const args = { match_id: "cache-match-1", region: "eu", platform: "pc", focus_player: "focus-puuid" };
     for (const name of ["valorant_get_match_timeline", "valorant_review_position", "valorant_render_round"]) {
       const response = await client.callTool({
@@ -110,6 +159,8 @@ try {
         await writeFile(join(tmpdir(), `valorant-mcp-${name}.png`), bytes);
       }
     }
+    assert.equal(countMatches(), 1);
+    assert.equal(await detailRequests(), 1, "Repeated tools performed another detail request");
     const invalid = await client.callTool({
       name: "valorant_list_matches",
       arguments: { player: "Test#EU", limit: 21 },
@@ -118,6 +169,41 @@ try {
   } finally {
     await client.close();
     await writeFile(join(tmpdir(), "valorant-mcp-package-server.log"), diagnostics);
+  }
+  const restarted = new Client({ name: "package-restart-smoke", version: "1" });
+  try {
+    await restarted.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: ["--preload", preload, entry],
+        cwd: temp,
+        env,
+        stderr: "pipe",
+      }),
+    );
+    const repeated = await restarted.callTool({
+      name: "valorant_get_match_timeline",
+      arguments: { match_id: "cache-match-1", focus_player: "focus-puuid" },
+    });
+    assert(!repeated.isError);
+    assert.equal(countMatches(), 1);
+    assert.equal(await detailRequests(), 1, "Restart did not reuse saved projection");
+    const second = await restarted.callTool({ name: "valorant_get_match", arguments: { match_id: "cache-match-2" } });
+    assert(!second.isError);
+    assert.equal(countMatches(), 2);
+    assert.equal(await detailRequests(), 2);
+    const comparison = await restarted.callTool({
+      name: "valorant_compare_matches",
+      arguments: { player: "focus-puuid", match_ids: ["cache-match-1", "cache-match-2"] },
+    });
+    assert(!comparison.isError);
+    assert.equal(countMatches(), 2);
+    assert.equal(await detailRequests(), 2, "Comparison re-fetched saved matches");
+    console.error(
+      "Packed stdio cache proof: 0 → 1 → 1 after repeat/restart → 2; exactly two selected detail requests.",
+    );
+  } finally {
+    await restarted.close();
   }
   // Smoke-test the actual packed CLI, not an import of the source module.
   const version = await run([entry, "--version"], temp);
@@ -151,7 +237,7 @@ try {
     await httpClient.connect(
       new StreamableHTTPClientTransport(url, { requestInit: { headers: { Authorization: `Bearer ${httpToken}` } } }),
     );
-    assert.equal((await httpClient.listTools()).tools.length, 15);
+    assert.equal((await httpClient.listTools()).tools.length, 20);
     const response = await httpClient.callTool({
       name: "valorant_get_match_timeline",
       arguments: { match_id: "cache-match-1", region: "eu", platform: "pc", focus_player: "focus-puuid" },
@@ -164,7 +250,7 @@ try {
     await writeFile(join(tmpdir(), "valorant-mcp-package-http.log"), await httpDiagnostics);
   }
   console.log(
-    `Package smoke passed: isolated install, 15 schemas, local knowledge, cached timeline, position review, PNG rendering, input validation, CLI, and authenticated localhost HTTP.\nInstall log: ${logPath}`,
+    `Package smoke passed: isolated install, 20 schemas, local knowledge, cached timeline, position review, PNG rendering, input validation, CLI, and authenticated localhost HTTP.\nInstall log: ${logPath}`,
   );
 } finally {
   await rm(temp, { recursive: true, force: true });

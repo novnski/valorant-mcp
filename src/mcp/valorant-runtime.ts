@@ -1,3 +1,10 @@
+import { normalizeRankHistory } from "./rank-history";
+import { compareSelectedMatches } from "./selected-match-comparison";
+import { PatchNotesRuntime, type PatchNotesInput } from "./patch-notes-runtime";
+import { SharedReads, requestSignal } from "./request-context";
+import { TransientCache } from "./transient-cache";
+import { canReuseListedMatch } from "../services/match-completeness";
+import { rawPage, type RawPage, type RawPageInput } from "./raw-page";
 import { ValorantInputError } from "./errors";
 import { HenrikClient, type HenrikAccount } from "./henrik-client";
 import {
@@ -38,6 +45,7 @@ import { RoundAnalysisService } from "../services/round-analysis-service";
 import {
   buildDuelReplay,
   buildMatchTimeline,
+  pageMatchTimeline,
   buildPositionReview,
   buildRoundKillList,
   buildRoundIntelligence,
@@ -66,6 +74,7 @@ export type PlayerIdentity = {
   tagLine: string;
   region: string;
   platform: string;
+  availablePlatforms: string[];
   accountLevel: number | null;
   cardId: string | null;
   titleId: string | null;
@@ -87,7 +96,17 @@ export type RecentMatchResult = {
   matches: Array<MatchSummary & { index: number }>;
   requested: number;
   returned: number;
-  hasMore: boolean;
+  hasMore: boolean | null;
+  window?: {
+    start: number;
+    requested: number;
+    providerRows: number;
+    returnedUnique: number;
+    nextStart: number | null;
+    moreStatus: "unknown" | "short-provider-window";
+    map: string | null;
+    mode: string | null;
+  };
 };
 
 export type MatchAnalysisResult = {
@@ -123,7 +142,6 @@ type HenrikReader = Pick<
   "getAccountByPuuid" | "getAccountByRiotId" | "getMatch" | "getMatchesByPuuid" | "getMmrByPuuid"
 >;
 
-type CacheEntry<T> = { expiresAt: number; value: T };
 type BaseMatchLoad = {
   detail: MatchDetail;
   raw: unknown;
@@ -139,12 +157,18 @@ const matchListTtlMs = 60_000;
 const matchTtlMs = 5 * 60_000;
 
 export class ValorantRuntime {
-  private readonly accounts = new Map<string, CacheEntry<HenrikAccount>>();
-  private readonly matchLists = new Map<string, CacheEntry<unknown[]>>();
-  private readonly listedRawMatches = new Map<string, CacheEntry<unknown>>();
-  private readonly matchBases = new Map<string, CacheEntry<BaseMatchLoad>>();
-  private readonly matches = new Map<string, CacheEntry<FullMatchLoad>>();
-  private readonly pendingMatchBases = new Map<string, Promise<BaseMatchLoad>>();
+  private readonly accounts = new TransientCache<HenrikAccount>(256, 1024 * 1024);
+  private readonly matchLists = new TransientCache<unknown[]>(32, 16 * 1024 * 1024);
+  private readonly listedRawMatches = new TransientCache<unknown>(64, 32 * 1024 * 1024);
+  private readonly matchBases = new TransientCache<BaseMatchLoad>(32, 32 * 1024 * 1024);
+  private readonly matches = new TransientCache<FullMatchLoad>(64, 16 * 1024 * 1024);
+  private readonly refreshTimes = new TransientCache<number>(128, 64 * 1024);
+  private readonly reads = new SharedReads();
+  private readonly rankHistories = new TransientCache<{
+    rows: ReturnType<typeof normalizeRankHistory>;
+    fetchedAt: string;
+  }>(64, 2 * 1024 * 1024);
+  private readonly ranks = new TransientCache<{ rank: RankSnapshot | null }>(128, 1024 * 1024);
   private readonly roundAnalysis = new RoundAnalysisService();
   private readonly matchPerformance = new MatchPerformanceService();
   private readonly matchEconomy = new MatchEconomyService();
@@ -152,9 +176,23 @@ export class ValorantRuntime {
   private readonly roundEvidence = new MatchRoundEvidenceService();
 
   constructor(
-    private readonly henrik: HenrikReader,
+    private readonly henrik: HenrikReader &
+      Partial<Pick<HenrikClient, "getWebsite" | "getWebsiteEntry" | "getMmrHistoryByPuuid">>,
     private readonly matchCache: MatchCache | null = null,
-  ) {}
+  ) {
+    this.patchNotes = new PatchNotesRuntime(
+      henrik.getWebsite && henrik.getWebsiteEntry
+        ? {
+            getWebsite: (locale) => henrik.getWebsite!(locale),
+            getWebsiteEntry: (locale, id) => henrik.getWebsiteEntry!(locale, id),
+          }
+        : null,
+    );
+  }
+  private readonly patchNotes: PatchNotesRuntime;
+  async getPatchNotes(input: PatchNotesInput) {
+    return this.patchNotes.getPatchNotes(input);
+  }
 
   static fromEnv(env: NodeJS.ProcessEnv = process.env): ValorantRuntime {
     return new ValorantRuntime(HenrikClient.fromEnv(env), SqliteMatchCache.fromEnv(env));
@@ -166,11 +204,86 @@ export class ValorantRuntime {
 
   async getPlayer(player: string, region: ValorantRegion, platform: ValorantPlatform): Promise<PlayerProfile> {
     const context = await this.resolvePlayerContext(player, region, platform);
-    const rawMmr = await this.henrik.getMmrByPuuid(context.region, context.platform, context.account.puuid);
+    const key = JSON.stringify([context.region, context.platform, context.account.puuid]);
+    const rank = await this.reads.run(`rank:${key}`, async () => {
+      const cached = this.ranks.get(key);
+      if (cached) return cached.rank;
+      const fresh = normalizeRank(
+        await this.henrik.getMmrByPuuid(context.region, context.platform, context.account.puuid),
+      );
+      this.ranks.set(key, { rank: fresh }, matchListTtlMs);
+      return fresh;
+    });
     return {
       identity: playerIdentity(context.account, context.region, context.platform),
-      rank: normalizeRank(rawMmr),
+      rank,
     };
+  }
+
+  async getRankHistory(input: { player: string; region: ValorantRegion; platform: ValorantPlatform; limit: number }) {
+    if (!this.henrik.getMmrHistoryByPuuid)
+      throw new ValorantInputError("Rank history is unavailable in this connection.");
+    const context = await this.resolvePlayerContext(input.player, input.region, input.platform);
+    const key = JSON.stringify([context.account.puuid, context.region, context.platform]);
+    const saved = await this.reads.run(`rr:${key}`, async () => {
+      const cached = this.rankHistories.get(key);
+      if (cached) return cached;
+      const raw = await this.henrik.getMmrHistoryByPuuid!(context.region, context.platform, context.account.puuid);
+      const value = { rows: normalizeRankHistory(raw, context.account.puuid), fetchedAt: new Date().toISOString() };
+      this.rankHistories.set(key, value, matchListTtlMs);
+      return value;
+    });
+    return {
+      player: playerIdentity(context.account, context.region, context.platform),
+      history: saved.rows.slice(0, input.limit),
+      returned: Math.min(saved.rows.length, input.limit),
+      availableInProviderWindow: saved.rows.length,
+      truncated: saved.rows.length > input.limit,
+      source_fetched_at: saved.fetchedAt,
+      limitations: [
+        "This is the provider's returned recent window, not a complete ranked history.",
+        "providerElo is a provider-reported rank value, not Riot's hidden matchmaking rating.",
+        "Referenced matches are not opened or persisted by this read.",
+      ],
+    };
+  }
+
+  async compareMatches(input: {
+    player: string;
+    matchIds: string[];
+    region: ValorantRegion;
+    platform: ValorantPlatform;
+  }) {
+    const ids = [...new Set(input.matchIds.map((id) => parseTrackerMatchInput(id).matchId))];
+    if (ids.length < 2 || ids.length > 5)
+      throw new ValorantInputError("Select between two and five distinct match IDs.");
+    const selector = parseTrackerProfileInput(input.player).player;
+    const selected = [];
+    let expectedPuuid: string | null = null;
+    for (const matchId of ids) {
+      const loaded = await this.getMatch({
+        matchId,
+        region: input.region,
+        platform: input.platform,
+        focusPlayer: input.player,
+        requiredEvidence: "scoreboard",
+      });
+      const participants = loaded.detail.teams.flatMap((team) => team.players);
+      const participant = participants.find((player) => player.puuid === loaded.focusPuuid);
+      if (!participant || !participant.puuid)
+        throw new ValorantInputError(`The explicit player is not a participant in selected match ${matchId}.`);
+      // Resolve a name that is not an exact local identity through the account endpoint; an agent name alone is not an identity.
+      if (!expectedPuuid)
+        expectedPuuid =
+          participant.puuid === selector ||
+          `${participant.gameName}#${participant.tagLine}`.toLowerCase() === selector.toLowerCase()
+            ? participant.puuid
+            : (await this.resolvePlayerContext(input.player, input.region, input.platform)).account.puuid;
+      if (participant.puuid !== expectedPuuid)
+        throw new ValorantInputError("The selected matches do not resolve to the same explicit player.");
+      selected.push({ ...loaded, participant });
+    }
+    return compareSelectedMatches(selected);
   }
 
   async listMatches(input: {
@@ -179,21 +292,42 @@ export class ValorantRuntime {
     platform: ValorantPlatform;
     limit: number;
     mode?: string;
+    map?: string;
+    start?: number;
   }): Promise<RecentMatchResult> {
     const context = await this.resolvePlayerContext(input.player, input.region, input.platform);
     const mode = input.mode ?? context.playlist ?? undefined;
-    const key = [context.account.puuid, context.region, context.platform, mode ?? "all", input.limit].join(":");
-    let rawMatches = readCache(this.matchLists, key);
-    if (!rawMatches) {
-      rawMatches = await this.henrik.getMatchesByPuuid(
+    const start = input.start ?? 0;
+    const key = [
+      context.account.puuid,
+      context.region,
+      context.platform,
+      encodeURIComponent(mode ?? "all"),
+      encodeURIComponent(input.map ?? "all"),
+      start,
+      input.limit,
+    ].join(":");
+    const rawMatches = await this.reads.run(`history:${key}`, async () => {
+      const cached = readCache(this.matchLists, key);
+      if (cached) return cached;
+      const prefix = key.slice(0, key.lastIndexOf(":") + 1);
+      for (const candidateKey of this.matchLists.keys()) {
+        if (!candidateKey.startsWith(prefix)) continue;
+        const larger = readCache(this.matchLists, candidateKey);
+        if (larger && larger.length >= input.limit) return larger.slice(0, input.limit);
+      }
+      const fresh = await this.henrik.getMatchesByPuuid(
         context.region,
         context.platform,
         context.account.puuid,
         input.limit,
         mode,
+        input.map,
+        start,
       );
-      writeCache(this.matchLists, key, rawMatches, matchListTtlMs);
-    }
+      writeCache(this.matchLists, key, fresh, matchListTtlMs);
+      return fresh;
+    });
     const normalizedMatches = normalizeMatches(rawMatches, context.account.puuid);
     for (const [matchId, raw] of normalizedMatches.rawByMatchId) {
       writeCache(this.listedRawMatches, rawMatchKey(context.region, context.platform, matchId), raw, matchListTtlMs);
@@ -212,18 +346,32 @@ export class ValorantRuntime {
       matches: normalized.slice(0, input.limit).map((match, index) => ({ ...match, index: index + 1 })),
       requested: input.limit,
       returned: Math.min(normalized.length, input.limit),
-      hasMore: normalized.length >= input.limit,
+      hasMore: rawMatches.length >= input.limit ? null : false,
+      window: {
+        start,
+        requested: input.limit,
+        providerRows: rawMatches.length,
+        returnedUnique: Math.min(normalized.length, input.limit),
+        nextStart: rawMatches.length >= input.limit ? start + rawMatches.length : null,
+        moreStatus: rawMatches.length >= input.limit ? "unknown" : "short-provider-window",
+        map: input.map ?? null,
+        mode: mode ?? null,
+      },
     };
   }
 
   async getMatch(input: {
+    refresh?: boolean;
+    requiredEvidence?: "scoreboard" | "tactical";
     matchId: string;
     region: ValorantRegion;
     platform: ValorantPlatform;
     focusPlayer?: string;
   }): Promise<{ detail: MatchDetail; focusPuuid: string | null; cache: MatchCacheProvenance }> {
     const matchId = parseTrackerMatchInput(input.matchId).matchId;
-    const base = await this.loadBaseMatch(matchId, input.region, input.platform);
+    const base = input.refresh
+      ? await this.refreshMatch(matchId, input.region, input.platform)
+      : await this.loadBaseMatch(matchId, input.region, input.platform, input.requiredEvidence);
     const focusPuuid = await this.resolveFocusPuuid(base.detail, input.focusPlayer, input.region, input.platform);
     const cacheKey = `${input.region}:${input.platform}:${matchId}:${focusPuuid ?? "none"}`;
     const cached = readCache(this.matches, cacheKey);
@@ -271,12 +419,14 @@ export class ValorantRuntime {
     return { ...result, focusPuuid };
   }
 
-  async getRawMatch(input: {
-    matchId: string;
-    region: ValorantRegion;
-    platform: ValorantPlatform;
-    section: "metadata" | "players" | "teams" | "rounds" | "kills" | "all";
-  }): Promise<{ matchId: string; section: string; data: unknown; source: "henrik-raw"; cache: MatchCacheProvenance }> {
+  async getRawMatch(
+    input: RawPageInput & {
+      matchId: string;
+      region: ValorantRegion;
+      platform: ValorantPlatform;
+      section: "metadata" | "players" | "teams" | "rounds" | "kills" | "all";
+    },
+  ): Promise<RawPage & { matchId: string; section: string; source: "henrik-raw"; cache: MatchCacheProvenance }> {
     const matchId = parseTrackerMatchInput(input.matchId).matchId;
     const loaded = await this.loadBaseMatch(matchId, input.region, input.platform);
     const raw = loaded.raw;
@@ -286,13 +436,14 @@ export class ValorantRuntime {
     return {
       matchId,
       section: input.section,
-      data: input.section === "all" ? raw : (row[input.section] ?? null),
+      ...rawPage(input.section === "all" ? raw : (row[input.section] ?? null), input),
       source: "henrik-raw",
       cache: loaded.cache,
     };
   }
 
   async getMatchProjection(input: {
+    refresh?: boolean;
     matchId: string;
     region: ValorantRegion;
     platform: ValorantPlatform;
@@ -300,13 +451,15 @@ export class ValorantRuntime {
   }): Promise<{
     match: UserMatchProjectionV1;
     scoreboard: UserMatchScoreboardProjectionV1;
+    evidence: MatchDetail["evidence"];
     cache: MatchCacheProvenance;
   }> {
-    const { detail, focusPuuid, cache } = await this.getMatch(input);
+    const { detail, focusPuuid, cache } = await this.getMatch({ ...input, requiredEvidence: "scoreboard" });
     return {
       match: buildUserMatchProjectionV1(detail, focusPuuid),
       scoreboard: buildUserMatchScoreboardProjectionV1(detail, focusPuuid),
       cache,
+      evidence: detail.evidence,
     };
   }
 
@@ -333,11 +486,14 @@ export class ValorantRuntime {
   }
 
   async getMatchTimeline(input: {
+    roundFrom?: number;
+    roundTo?: number;
+    limit?: number;
     matchId: string;
     region: ValorantRegion;
     platform: ValorantPlatform;
     focusPlayer?: string;
-  }): Promise<MatchTimeline & { cache: MatchCacheProvenance }> {
+  }) {
     const { detail, focusPuuid, cache: loadedCache } = await this.getMatch(input);
     let cache = loadedCache;
     if (this.matchCache && cache.payloadHash) {
@@ -350,7 +506,8 @@ export class ValorantRuntime {
           matchTimelineProjectionVersion,
           cache.payloadHash,
         );
-        if (saved) return { ...saved, cache: { ...cache, source: "local-projection" } };
+        if (saved)
+          return { ...pageMatchTimeline(saved, input), cache: { ...cache, source: "local-projection" as const } };
       } catch (error) {
         cache = {
           ...cache,
@@ -377,7 +534,7 @@ export class ValorantRuntime {
         };
       }
     }
-    return { ...timeline, cache };
+    return { ...pageMatchTimeline(timeline, input), cache };
   }
 
   async getRound(input: {
@@ -579,30 +736,53 @@ export class ValorantRuntime {
     };
   }
 
-  private async loadBaseMatch(
+  private async refreshMatch(
     matchId: string,
     region: ValorantRegion,
     platform: ValorantPlatform,
   ): Promise<BaseMatchLoad> {
     const key = rawMatchKey(region, platform, matchId);
-    const inMemory = readCache(this.matchBases, key);
-    if (inMemory) return inMemory;
-    const pending = this.pendingMatchBases.get(key);
-    if (pending) return await pending;
-    const load = this.loadBaseMatchUncached(matchId, region, platform)
-      .then((result) => {
-        writeCache(this.matchBases, key, result, matchTtlMs);
-        return result;
-      })
-      .finally(() => this.pendingMatchBases.delete(key));
-    this.pendingMatchBases.set(key, load);
-    return await load;
+    return this.reads.run(`refresh:${key}`, async () => {
+      await this.reads.waitIfPending(`base:${key}`);
+      const last = this.refreshTimes.get(key);
+      if (last !== null && Date.now() - last < 60_000)
+        throw new ValorantInputError(
+          "This match was refreshed recently. Wait 60 seconds before explicitly refreshing it again; ordinary saved reads remain available.",
+        );
+      this.refreshTimes.set(key, Date.now(), 60_000);
+      const raw = await this.henrik.getMatch(region, platform, matchId);
+      requestSignal()?.throwIfAborted();
+      const detail = this.normalizeBase(raw, region, platform, matchId);
+      const result = this.persistBase(detail, raw, "henrik-detail", "match-detail-v4", null);
+      for (const cachedKey of this.matches.keys()) if (cachedKey.startsWith(`${key}:`)) this.matches.delete(cachedKey);
+      writeCache(this.matchBases, key, result, matchTtlMs);
+      return result;
+    });
+  }
+
+  private async loadBaseMatch(
+    matchId: string,
+    region: ValorantRegion,
+    platform: ValorantPlatform,
+    requiredEvidence: "scoreboard" | "tactical" = "tactical",
+  ): Promise<BaseMatchLoad> {
+    const key = rawMatchKey(region, platform, matchId);
+    const refreshing = this.reads.waitIfPending<BaseMatchLoad>(`refresh:${key}`);
+    if (refreshing) return await refreshing;
+    return this.reads.run(`base:${key}`, async () => {
+      const inMemory = readCache(this.matchBases, key);
+      if (inMemory) return inMemory;
+      const result = await this.loadBaseMatchUncached(matchId, region, platform, requiredEvidence);
+      writeCache(this.matchBases, key, result, matchTtlMs);
+      return result;
+    });
   }
 
   private async loadBaseMatchUncached(
     matchId: string,
     region: ValorantRegion,
     platform: ValorantPlatform,
+    requiredEvidence: "scoreboard" | "tactical" = "tactical",
   ): Promise<BaseMatchLoad> {
     let cacheWarning: string | null = null;
     if (this.matchCache) {
@@ -642,12 +822,13 @@ export class ValorantRuntime {
     const recentRaw = readCache(this.listedRawMatches, rawMatchKey(region, platform, matchId));
     if (recentRaw !== null) {
       const recent = this.normalizeBase(recentRaw, region, platform, matchId);
-      if (isDetailCompleteEnough(recent)) {
+      if (canReuseListedMatch(recent, requiredEvidence)) {
         return this.persistBase(recent, recentRaw, "recent-list", "recent-list-v4", cacheWarning);
       }
     }
 
     const raw = await this.henrik.getMatch(region, platform, matchId);
+    requestSignal()?.throwIfAborted();
     const detail = this.normalizeBase(raw, region, platform, matchId);
     return this.persistBase(detail, raw, "henrik-detail", "match-detail-v4", cacheWarning);
   }
@@ -702,7 +883,9 @@ export class ValorantRuntime {
               savedAt: richer.savedAt,
               payloadHash: richer.payloadHash,
               projectionVersion: matchFocusProjectionVersion,
-              warning: priorWarning,
+              warning:
+                priorWarning ??
+                "The refreshed payload lost evidence in at least one dimension; the richer saved match was preserved.",
             },
           };
         }
@@ -735,9 +918,12 @@ export class ValorantRuntime {
     return {
       ...base,
       analysis: this.roundAnalysis.analyze(base, focusPuuid),
-      performance: this.matchPerformance.analyze(base, focusPuuid),
+      performance:
+        base.evidence && base.evidence.kills.state !== "complete"
+          ? null
+          : this.matchPerformance.analyze(base, focusPuuid),
       economy: this.matchEconomy.analyze(base),
-      duels: this.matchDuels.analyze(base),
+      duels: base.evidence && base.evidence.kills.state !== "complete" ? null : this.matchDuels.analyze(base),
       roundEvidence: this.roundEvidence.analyze(base),
     };
   }
@@ -767,22 +953,23 @@ export class ValorantRuntime {
     const normalized = player.trim();
     if (!normalized) throw new ValorantInputError("Player identifier is required");
     const cacheKey = `${region}:${platform}:${normalized.toLowerCase()}`;
-    const cached = readCache(this.accounts, cacheKey);
-    if (cached) return cached;
-
-    const riotId = splitRiotId(normalized);
-    const account = riotId
-      ? await this.henrik.getAccountByRiotId(riotId.name, riotId.tag)
-      : await this.henrik.getAccountByPuuid(normalized);
-    writeCache(this.accounts, cacheKey, account, accountTtlMs);
-    writeCache(this.accounts, `${region}:${platform}:${account.puuid.toLowerCase()}`, account, accountTtlMs);
-    writeCache(
-      this.accounts,
-      `${region}:${platform}:${account.name.toLowerCase()}#${account.tag.toLowerCase()}`,
-      account,
-      accountTtlMs,
-    );
-    return account;
+    return this.reads.run(`account:${cacheKey}`, async () => {
+      const cached = readCache(this.accounts, cacheKey);
+      if (cached) return cached;
+      const riotId = splitRiotId(normalized);
+      const account = riotId
+        ? await this.henrik.getAccountByRiotId(riotId.name, riotId.tag)
+        : await this.henrik.getAccountByPuuid(normalized);
+      writeCache(this.accounts, cacheKey, account, accountTtlMs);
+      writeCache(this.accounts, `${region}:${platform}:${account.puuid.toLowerCase()}`, account, accountTtlMs);
+      writeCache(
+        this.accounts,
+        `${region}:${platform}:${account.name.toLowerCase()}#${account.tag.toLowerCase()}`,
+        account,
+        accountTtlMs,
+      );
+      return account;
+    });
   }
 
   private async resolvePlayerContext(
@@ -818,7 +1005,8 @@ function playerIdentity(account: HenrikAccount, region: string, platform: string
     gameName: account.name,
     tagLine: account.tag,
     region: account.region ?? region,
-    platform: account.platforms?.[0]?.toLowerCase() ?? platform,
+    platform,
+    availablePlatforms: account.platforms?.map((value) => value.toLowerCase()) ?? [],
     accountLevel: account.account_level ?? null,
     cardId: account.card ?? null,
     titleId: account.title ?? null,
@@ -842,7 +1030,8 @@ function normalizeRank(raw: unknown): RankSnapshot | null {
     peakSeasonId: text(record(peak.season).id),
     peakSeasonShort: text(record(peak.season).short),
     leaderboardPlacement: finiteNumber(current.leaderboard_placement),
-    updatedAt: new Date().toISOString(),
+    updatedAt: text(root.updated_at) ?? text(current.updated_at),
+    fetchedAt: new Date().toISOString(),
   };
 }
 
@@ -932,29 +1121,11 @@ function rawMatchKey(region: string, platform: string, matchId: string): string 
   return `${region}:${platform}:${matchId}`;
 }
 
-function isDetailCompleteEnough(detail: MatchDetail): boolean {
-  const playerCount = detail.teams.reduce((count, team) => count + team.players.length, 0);
-  if (playerCount < 2) return false;
-  const mode = detail.mode
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z]/g, "");
-  if (mode === "deathmatch" || mode === "teamdeathmatch") return detail.killEvents.length > 0;
-  return detail.rounds.length > 0;
+function readCache<T>(cache: TransientCache<T>, key: string): T | null {
+  return cache.get(key);
 }
-
-function readCache<T>(cache: Map<string, CacheEntry<T>>, key: string): T | null {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (entry.expiresAt <= Date.now()) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.value;
-}
-
-function writeCache<T>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number): void {
-  cache.set(key, { expiresAt: Date.now() + ttlMs, value });
+function writeCache<T>(cache: TransientCache<T>, key: string, value: T, ttlMs: number): void {
+  cache.set(key, value, ttlMs);
 }
 
 function unique(values: string[]): string[] {

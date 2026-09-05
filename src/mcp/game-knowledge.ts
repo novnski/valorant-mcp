@@ -10,7 +10,11 @@ export type AgentKnowledge = {
   description: string | null;
   role: string | null;
   roleDescription: string | null;
-  abilities: Array<{ slot: string; name: string; description: string | null }>;
+  aliases?: string[];
+  icon?: string | null;
+  portrait?: string | null;
+  roleIcon?: string | null;
+  abilities: Array<{ slot: string; name: string; description: string | null; icon?: string | null }>;
 };
 
 export type MapCallout = { region: string; superRegion: string; x: number; y: number };
@@ -19,6 +23,9 @@ export type WeaponKnowledge = {
   uuid: string;
   name: string;
   category: string | null;
+  price?: number | null;
+  icon?: string | null;
+  aliases?: string[];
   fireRate: number | null;
   magazineSize: number | null;
   wallPenetration: string | null;
@@ -37,13 +44,15 @@ export type NearestCallout = {
 export type AbilityCastContext = {
   agent: string;
   role: string | null;
-  casts: Array<{ slot: string; ability: string; count: number; description: string | null }>;
+  casts: Array<{ slot: string; ability: string; count: number; description: string | null; icon?: string | null }>;
   limitation: string;
 };
 
 type KnowledgeFile = {
   version: number;
   generatedAt: string;
+  locale?: string;
+  contentVersion?: Record<string, unknown>;
   agents: AgentKnowledge[];
   maps: MapKnowledge[];
   weapons: WeaponKnowledge[];

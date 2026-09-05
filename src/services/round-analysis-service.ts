@@ -1,3 +1,4 @@
+import { killRoundNumber } from "./match-kill-round";
 import type {
   MatchAnalysis,
   MatchDetail,
@@ -32,13 +33,15 @@ export class RoundAnalysisService {
     const economyRounds = match.rounds.filter(hasComparableEconomy).length;
     if (economyRounds < match.rounds.length) warnings.push(missingEconomyEvidence);
 
+    const combatComplete = !match.evidence || match.evidence.kills.state === "complete";
+    if (!combatComplete) warnings.push(...match.warnings);
     const context = buildMatchContext(match);
     const candidates = [
-      ...clutchTurningPoints(match, focusPuuid, context),
-      ...multikillTurningPoints(match, focusPuuid, context),
+      ...(combatComplete ? clutchTurningPoints(match, focusPuuid, context) : []),
+      ...(combatComplete ? multikillTurningPoints(match, focusPuuid, context) : []),
       ...spikeTurningPoints(match, focusPuuid, context),
       ...economyTurningPoints(match, focusPuuid, context),
-      ...openingTurningPoints(match, focusPuuid, context),
+      ...(combatComplete ? openingTurningPoints(match, focusPuuid, context) : []),
     ];
 
     const strongestByRound = new Map<number, MatchTurningPoint>();
@@ -54,7 +57,7 @@ export class RoundAnalysisService {
       modelVersion: "round-analysis-v1",
       focusPuuid,
       turningPoints,
-      recommendation: matchRecommendation(match, focusPuuid, turningPoints, context),
+      recommendation: combatComplete ? matchRecommendation(match, focusPuuid, turningPoints, context) : null,
       evidence: {
         rounds: match.rounds.length,
         killEvents: match.killEvents.length,
@@ -258,7 +261,7 @@ function multikillTurningPoints(
 ): MatchTurningPoint[] {
   const groups = new Map<string, { roundNumber: number; events: MatchKillEvent[] }>();
   for (const event of match.killEvents) {
-    const roundNumber = eventRoundNumber(event, context.roundNumbers);
+    const roundNumber = killRoundNumber(match, event);
     if (roundNumber === null || !event.killerPuuid) continue;
     const key = `${roundNumber}:${event.killerPuuid}`;
     const group = groups.get(key) ?? { roundNumber, events: [] };
@@ -419,7 +422,7 @@ function buildMatchContext(match: MatchDetail): MatchContext {
   }
   const eventsByRound = new Map<number, MatchKillEvent[]>();
   for (const event of match.killEvents) {
-    const roundNumber = eventRoundNumber(event, roundNumbers);
+    const roundNumber = killRoundNumber(match, event);
     if (roundNumber === null) continue;
     const events = eventsByRound.get(roundNumber);
     if (events) events.push(event);
@@ -436,14 +439,6 @@ function buildMatchContext(match: MatchDetail): MatchContext {
     playerByName,
     playerByNameTag,
   };
-}
-
-function eventRoundNumber(event: MatchKillEvent, roundNumbers: Set<number>): number | null {
-  if (event.round === null) return null;
-  const eventRound = event.round;
-  if (roundNumbers.has(eventRound)) return eventRound;
-  if (roundNumbers.has(eventRound + 1)) return eventRound + 1;
-  return eventRound >= 0 ? eventRound + 1 : null;
 }
 
 function sortEvents(events: MatchKillEvent[]): MatchKillEvent[] {

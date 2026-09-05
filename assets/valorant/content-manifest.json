@@ -1,0 +1,555 @@
+{
+  "version": 1,
+  "source": "valorant-api.com",
+  "unofficial": true,
+  "locale": "en-US",
+  "sourceFetchedAt": "2026-09-05T22:45:23.270Z",
+  "contentVersion": {
+    "manifestId": "3A0EBC92259BF798",
+    "branch": "release-13.05",
+    "version": "13.05.00.5350494",
+    "buildVersion": "11",
+    "engineVersion": "5.3.2.0",
+    "riotClientVersion": "release-13.05-shipping-11-5350494",
+    "riotClientBuild": "111.0.0.3261.5663",
+    "buildDate": "2026-08-20T23:51:14Z"
+  },
+  "sources": [
+    {
+      "file": "version.json",
+      "url": "https://valorant-api.com/v1/version",
+      "sha256": "21bb51349a820322dc1d30fc2cbe79ece49d180307a8cd5bf269cf1b1947bd97",
+      "bytes": 284,
+      "cacheControl": "public, max-age=14400, stale-while-revalidate=60, stale-if-error=60"
+    },
+    {
+      "file": "agents.json",
+      "url": "https://valorant-api.com/v1/agents?isPlayableCharacter=true&language=en-US",
+      "sha256": "4441b76b821661b327dd09963aadb67a0d93a5c8b3e92cbb07a4e3735b9fc61a",
+      "bytes": 108198,
+      "cacheControl": "public, max-age=14400, stale-while-revalidate=60, stale-if-error=60"
+    },
+    {
+      "file": "maps.json",
+      "url": "https://valorant-api.com/v1/maps?language=en-US",
+      "sha256": "85279514886e98b1b14a0d15020e2731ac636b3e4c46d79806352be7f196f5a3",
+      "bytes": 88928,
+      "cacheControl": "public, max-age=14400, stale-while-revalidate=60, stale-if-error=60"
+    },
+    {
+      "file": "weapons.json",
+      "url": "https://valorant-api.com/v1/weapons?language=en-US",
+      "sha256": "6a0af1173aa8abc6fd055cf2962f7fe5c226069d9ca42b59cfeb1aae19f6308c",
+      "bytes": 3575209,
+      "cacheControl": "public, max-age=14400, stale-while-revalidate=60, stale-if-error=60"
+    }
+  ],
+  "knowledgeSha256": "528e48f8ab86240f62e3f833bd40f5bd565630fa3cb63daea39a91e76ee1d87a",
+  "transformsSha256": "d2e7642d85c7b6b80f871a7f8a0321f1ff8b93d5e9a8b311ef5162ef41b6776d",
+  "selectedFields": {
+    "agents": [
+      "uuid",
+      "name",
+      "aliases",
+      "description",
+      "role",
+      "roleDescription",
+      "roleIcon",
+      "icon",
+      "portrait",
+      "abilities"
+    ],
+    "maps": [
+      "uuid",
+      "name",
+      "coordinates",
+      "icon",
+      "splash",
+      "transforms",
+      "callouts"
+    ],
+    "weapons": [
+      "uuid",
+      "name",
+      "aliases",
+      "icon",
+      "price",
+      "category",
+      "fireRate",
+      "magazineSize",
+      "wallPenetration",
+      "damageRanges"
+    ]
+  },
+  "assets": [
+    {
+      "kind": "agents",
+      "name": "iso",
+      "uuid": "0e38b510-41a8-5780-5e8f-568b2a4f2d6c",
+      "file": "agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c.png",
+      "sha256": "b2c18170a366f5e72342e86aaba65ab7cf139e4903400ac5ead2397e47af10dc"
+    },
+    {
+      "kind": "agents",
+      "name": "cypher",
+      "uuid": "117ed9e3-49f3-6512-3ccf-0cada7e3823b",
+      "file": "agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b.png",
+      "sha256": "c563d8085b90e8e19fee8ef13cefd45356a69e49989f144631548079863dd694"
+    },
+    {
+      "kind": "agents",
+      "name": "clove",
+      "uuid": "1dbf2edd-4729-0984-3115-daa5eed44993",
+      "file": "agents/1dbf2edd-4729-0984-3115-daa5eed44993.png",
+      "sha256": "6704b491d95159f51b55bb7804c30eb89511487c77ba2e30fffb3beb774a7b18"
+    },
+    {
+      "kind": "agents",
+      "name": "killjoy",
+      "uuid": "1e58de9c-4950-5125-93e9-a0aee9f98746",
+      "file": "agents/1e58de9c-4950-5125-93e9-a0aee9f98746.png",
+      "sha256": "f69b0c15f564925d0972b9aa0e60ee180839f5c111847d7e0b18a179f750e640"
+    },
+    {
+      "kind": "agents",
+      "name": "chamber",
+      "uuid": "22697a3d-45bf-8dd7-4fec-84a9e28c69d7",
+      "file": "agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7.png",
+      "sha256": "7703fa1ae4289af11e3ce7cac4f0293fa93e1719bd39f0e44eaeee6e9f4c7e15"
+    },
+    {
+      "kind": "agents",
+      "name": "sova",
+      "uuid": "320b2a48-4d9b-a075-30f1-1f93a9b638fa",
+      "file": "agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa.png",
+      "sha256": "24d84a2b82806899441511b3f2a4c152e7792f756231f231b4e54af1c6e99be2"
+    },
+    {
+      "kind": "agents",
+      "name": "astra",
+      "uuid": "41fb69c1-4189-7b37-f117-bcaf1e96f1bf",
+      "file": "agents/41fb69c1-4189-7b37-f117-bcaf1e96f1bf.png",
+      "sha256": "70061e655c229326b38efad764f4b82263ac3065e7b3aa9a6808f737387bb176"
+    },
+    {
+      "kind": "agents",
+      "name": "sage",
+      "uuid": "569fdd95-4d10-43ab-ca70-79becc718b46",
+      "file": "agents/569fdd95-4d10-43ab-ca70-79becc718b46.png",
+      "sha256": "56a14a4a033fb1769574e331f03dca5aaf39c8b6aa65b6d0b2558647f6bd38d6"
+    },
+    {
+      "kind": "agents",
+      "name": "breach",
+      "uuid": "5f8d3a7f-467b-97f3-062c-13acf203c006",
+      "file": "agents/5f8d3a7f-467b-97f3-062c-13acf203c006.png",
+      "sha256": "e38c30c81de0601bd3de340aefdc82e01ddf4a7580c3848eff45c59f03793362"
+    },
+    {
+      "kind": "agents",
+      "name": "kay/o",
+      "uuid": "601dbbe7-43ce-be57-2a40-4abd24953621",
+      "file": "agents/601dbbe7-43ce-be57-2a40-4abd24953621.png",
+      "sha256": "e0f200b03983bc1ee4cbc17476d2940b241e3841943ca6795406bdeeb9f50b98"
+    },
+    {
+      "kind": "agents",
+      "name": "skye",
+      "uuid": "6f2a04ca-43e0-be17-7f36-b3908627744d",
+      "file": "agents/6f2a04ca-43e0-be17-7f36-b3908627744d.png",
+      "sha256": "96b7997f91b5f7ccb8872b8069b198dfc9bea871e8347559f7a4b9b1dd53b84e"
+    },
+    {
+      "kind": "agents",
+      "name": "viper",
+      "uuid": "707eab51-4836-f488-046a-cda6bf494859",
+      "file": "agents/707eab51-4836-f488-046a-cda6bf494859.png",
+      "sha256": "3a8b0582cfd95e3a9a1d83c3b1e824de3c20af15574396adff125a51ad6c6916"
+    },
+    {
+      "kind": "agents",
+      "name": "miks",
+      "uuid": "7c8a4701-4de6-9355-b254-e09bc2a34b72",
+      "file": "agents/7c8a4701-4de6-9355-b254-e09bc2a34b72.png",
+      "sha256": "d50919fcf1b6c5ca92155d0b6d3d0a15e0d3d2f958a63eb84df6076c6abe4649"
+    },
+    {
+      "kind": "agents",
+      "name": "yoru",
+      "uuid": "7f94d92c-4234-0a36-9646-3a87eb8b5c89",
+      "file": "agents/7f94d92c-4234-0a36-9646-3a87eb8b5c89.png",
+      "sha256": "1ca02a8e6fb437fba4864f293973e79e46382b2a57b55cafeb4df3d95d3a8216"
+    },
+    {
+      "kind": "agents",
+      "name": "omen",
+      "uuid": "8e253930-4c05-31dd-1b6c-968525494517",
+      "file": "agents/8e253930-4c05-31dd-1b6c-968525494517.png",
+      "sha256": "5961fac1d5f2f2cd9e35d6d8acb09df7016e0ec51cc53eac49ff8664c419b313"
+    },
+    {
+      "kind": "agents",
+      "name": "veto",
+      "uuid": "92eeef5d-43b5-1d4a-8d03-b3927a09034b",
+      "file": "agents/92eeef5d-43b5-1d4a-8d03-b3927a09034b.png",
+      "sha256": "73a36fd036123fc3497716b820605f67a13fae3533fb2c79c646fbbea37d3cee"
+    },
+    {
+      "kind": "agents",
+      "name": "harbor",
+      "uuid": "95b78ed7-4637-86d9-7e41-71ba8c293152",
+      "file": "agents/95b78ed7-4637-86d9-7e41-71ba8c293152.png",
+      "sha256": "f522b11d545d61b45b2d0fef6097f6c17f6bd6f40caa95a0326d8824035f2590"
+    },
+    {
+      "kind": "agents",
+      "name": "brimstone",
+      "uuid": "9f0d8ba9-4140-b941-57d3-a7ad57c6b417",
+      "file": "agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417.png",
+      "sha256": "ab3be7c8412fdf78b72987d7829dd570f600927bbfe9b1487c51c995560c73d5"
+    },
+    {
+      "kind": "agents",
+      "name": "reyna",
+      "uuid": "a3bfb853-43b2-7238-a4f1-ad90e9e46bcc",
+      "file": "agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc.png",
+      "sha256": "adda77d405273bcecf6eb05d737da2db7e5443adde45f5cff5b9b648ec3df8dc"
+    },
+    {
+      "kind": "agents",
+      "name": "jett",
+      "uuid": "add6443a-41bd-e414-f6ad-e58d267f4e95",
+      "file": "agents/add6443a-41bd-e414-f6ad-e58d267f4e95.png",
+      "sha256": "04d5f6b623ebb3f42f3fa572dab3bbad3be614d127ba7d2ea28575a0f30b4045"
+    },
+    {
+      "kind": "agents",
+      "name": "tejo",
+      "uuid": "b444168c-4e35-8076-db47-ef9bf368f384",
+      "file": "agents/b444168c-4e35-8076-db47-ef9bf368f384.png",
+      "sha256": "d6c800a5c3470779cb3b9795265a9fbc329aed5f50d9db31f9a389ff0bd6318f"
+    },
+    {
+      "kind": "agents",
+      "name": "neon",
+      "uuid": "bb2a4828-46eb-8cd1-e765-15848195d751",
+      "file": "agents/bb2a4828-46eb-8cd1-e765-15848195d751.png",
+      "sha256": "f491dff17632b08a009eda907000097169bd4a048c9cb7e5d6feb0723d88b9a2"
+    },
+    {
+      "kind": "agents",
+      "name": "deadlock",
+      "uuid": "cc8b64c8-4b25-4ff9-6e7f-37b4da43d235",
+      "file": "agents/cc8b64c8-4b25-4ff9-6e7f-37b4da43d235.png",
+      "sha256": "473c76937bb788450fd7b3c7a5460e5131c7307d7102248d382c816ce5d5d482"
+    },
+    {
+      "kind": "agents",
+      "name": "fade",
+      "uuid": "dade69b4-4f5a-8528-247b-219e5a1facd6",
+      "file": "agents/dade69b4-4f5a-8528-247b-219e5a1facd6.png",
+      "sha256": "2ea9f3af0e07a8fc4c1b24cc3e6c5b5718824dc64a26dadf1f9cea00530fe894"
+    },
+    {
+      "kind": "agents",
+      "name": "waylay",
+      "uuid": "df1cb487-4902-002e-5c17-d28e83e78588",
+      "file": "agents/df1cb487-4902-002e-5c17-d28e83e78588.png",
+      "sha256": "f4118f1567f4285fa6bfa7d3b36fcebe95b34a8bb7c21bdefe99bb75ceffec8a"
+    },
+    {
+      "kind": "agents",
+      "name": "gekko",
+      "uuid": "e370fa57-4757-3604-3648-499e1f642d3f",
+      "file": "agents/e370fa57-4757-3604-3648-499e1f642d3f.png",
+      "sha256": "d86ce31860b104c60abd2a75402e89126dc95e06fdb2acb2299c4a0e27018e77"
+    },
+    {
+      "kind": "agents",
+      "name": "phoenix",
+      "uuid": "eb93336a-449b-9c1b-0a54-a891f7921d69",
+      "file": "agents/eb93336a-449b-9c1b-0a54-a891f7921d69.png",
+      "sha256": "b15901ae8693d703b8b0bdc510b675194ef86cf11da1bcbb92d3a5524f0dad6b"
+    },
+    {
+      "kind": "agents",
+      "name": "vyse",
+      "uuid": "efba5359-4016-a1e5-7626-b1ae76895940",
+      "file": "agents/efba5359-4016-a1e5-7626-b1ae76895940.png",
+      "sha256": "afa8d35bdfe05f4b4a4405b699a3416ce8100fee8da86df0df3e6956165fff11"
+    },
+    {
+      "kind": "agents",
+      "name": "raze",
+      "uuid": "f94c3b30-42be-e959-889c-5aa313dba261",
+      "file": "agents/f94c3b30-42be-e959-889c-5aa313dba261.png",
+      "sha256": "63456bd7a31c64bcffa6ce4386363a222fb6d68b9251c47f01f2dc512f7ac52d"
+    },
+    {
+      "kind": "maps",
+      "name": "kasbah",
+      "uuid": "12452a9d-48c3-0b02-e7eb-0381c3520404",
+      "file": "maps/12452a9d-48c3-0b02-e7eb-0381c3520404.png",
+      "sha256": "ea21808c159dfbb98eedb5532dfa2933c7818aff7fb2e92e6a8f7ae295ce736c"
+    },
+    {
+      "kind": "maps",
+      "name": "corrode",
+      "uuid": "1c18ab1f-420d-0d8b-71d0-77ad3c439115",
+      "file": "maps/1c18ab1f-420d-0d8b-71d0-77ad3c439115.png",
+      "sha256": "9f9ed010f502a1146435e779ec2979ce2eb72f78559df19fb89d47e36c98a483"
+    },
+    {
+      "kind": "maps",
+      "name": "abyss",
+      "uuid": "224b0a95-48b9-f703-1bd8-67aca101a61f",
+      "file": "maps/224b0a95-48b9-f703-1bd8-67aca101a61f.png",
+      "sha256": "466a3d18f78c251b416533959471bdef80b75e9dd3f8a89b1601e6c1ed4d299f"
+    },
+    {
+      "kind": "maps",
+      "name": "haven",
+      "uuid": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047",
+      "file": "maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047.png",
+      "sha256": "f8ccc9cfffaf3eeed0b735cf3ecffc1ce46f0fbb54bdb69d9ba72b63d32b4936"
+    },
+    {
+      "kind": "maps",
+      "name": "drift",
+      "uuid": "2c09d728-42d5-30d8-43dc-96a05cc7ee9d",
+      "file": "maps/2c09d728-42d5-30d8-43dc-96a05cc7ee9d.png",
+      "sha256": "0a641823f29af9757196bddec2f4e1537467ce98b8a2501853e10af567c23cc9"
+    },
+    {
+      "kind": "maps",
+      "name": "bind",
+      "uuid": "2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba",
+      "file": "maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba.png",
+      "sha256": "84f5ff72aa58bf677617ab5792def847c1c154b38f6e7458f7234121baa3507f"
+    },
+    {
+      "kind": "maps",
+      "name": "breeze",
+      "uuid": "2fb9a4fd-47b8-4e7d-a969-74b4046ebd53",
+      "file": "maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53.png",
+      "sha256": "82c6472afe6f34ac4c0d979fbf6df0a739c174292edf593f29b9495f3b3f84a2"
+    },
+    {
+      "kind": "maps",
+      "name": "lotus",
+      "uuid": "2fe4ed3a-450a-948b-6d6b-e89a78e680a9",
+      "file": "maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9.png",
+      "sha256": "d533af2a6fbc09f12579b2d33438a610d5846db61e56842ad3038087155851c2"
+    },
+    {
+      "kind": "maps",
+      "name": "district",
+      "uuid": "690b3ed2-4dff-945b-8223-6da834e30d24",
+      "file": "maps/690b3ed2-4dff-945b-8223-6da834e30d24.png",
+      "sha256": "73447621e261e1b1fa45e37afd0b1d2593c5dd0e8e2b06d5532475c08e790478"
+    },
+    {
+      "kind": "maps",
+      "name": "summit",
+      "uuid": "756da597-416b-c0f2-f47b-afbdf28670bc",
+      "file": "maps/756da597-416b-c0f2-f47b-afbdf28670bc.png",
+      "sha256": "e3ceb9a90958953933aa2e0a7821cb42eb80d622700be89c288d933ac855075f"
+    },
+    {
+      "kind": "maps",
+      "name": "ascent",
+      "uuid": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
+      "file": "maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319.png",
+      "sha256": "287357fcfce230ecb67704cafdb519a5bdb91602ed30f897474a65e86469c550"
+    },
+    {
+      "kind": "maps",
+      "name": "sunset",
+      "uuid": "92584fbe-486a-b1b2-9faa-39b0f486b498",
+      "file": "maps/92584fbe-486a-b1b2-9faa-39b0f486b498.png",
+      "sha256": "1188642e2f94f4fbb17d6c61feb9071d349dec21c9749349db710afbc1bbb228"
+    },
+    {
+      "kind": "maps",
+      "name": "fracture",
+      "uuid": "b529448b-4d60-346e-e89e-00a4c527a405",
+      "file": "maps/b529448b-4d60-346e-e89e-00a4c527a405.png",
+      "sha256": "d41e013eca94e680a61a4d4572929e46d818efce0fb3f065410d9d36399d1a6b"
+    },
+    {
+      "kind": "maps",
+      "name": "glitch",
+      "uuid": "d6336a5a-428f-c591-98db-c8a291159134",
+      "file": "maps/d6336a5a-428f-c591-98db-c8a291159134.png",
+      "sha256": "c34e46a2e1765bace51f46f6d976b65895e91a2e0c9fed933e0c33bedde2fb5a"
+    },
+    {
+      "kind": "maps",
+      "name": "split",
+      "uuid": "d960549e-485c-e861-8d71-aa9d1aed12a2",
+      "file": "maps/d960549e-485c-e861-8d71-aa9d1aed12a2.png",
+      "sha256": "cc102270353627dab124a7c4ecc429fa150982aa7f243b944ac15f8f83b5b7c8"
+    },
+    {
+      "kind": "maps",
+      "name": "piazza",
+      "uuid": "de28aa9b-4cbe-1003-320e-6cb3ec309557",
+      "file": "maps/de28aa9b-4cbe-1003-320e-6cb3ec309557.png",
+      "sha256": "04deb338e29564179f6cd0c37cc09755b6ee5c0f5515e5d2c7d886f054d0231b"
+    },
+    {
+      "kind": "maps",
+      "name": "icebox",
+      "uuid": "e2ad5c54-4114-a870-9641-8ea21279579a",
+      "file": "maps/e2ad5c54-4114-a870-9641-8ea21279579a.png",
+      "sha256": "85b9cef2682985b2cf44f260d995d8123d40246f6d078dbf188fe27ed71723db"
+    },
+    {
+      "kind": "maps",
+      "name": "pearl",
+      "uuid": "fd267378-4d1d-484f-ff52-77821ed10dc2",
+      "file": "maps/fd267378-4d1d-484f-ff52-77821ed10dc2.png",
+      "sha256": "5e0e7d4a80d830d9b8bb0f265cb14245be583bce87a69d3f53a07e9083ca810c"
+    },
+    {
+      "kind": "weapons",
+      "name": "ghost",
+      "uuid": "1baa85b4-4c70-1284-64bb-6481dfc3bb4e",
+      "file": "weapons/1baa85b4-4c70-1284-64bb-6481dfc3bb4e.png",
+      "sha256": "9b4d2a41cd740f5e7dd746e70c38b930d8d6b34a9373b4224373f8be1c1db516"
+    },
+    {
+      "kind": "weapons",
+      "name": "classic",
+      "uuid": "29a0cfab-485b-f5d5-779a-b59f85e204a8",
+      "file": "weapons/29a0cfab-485b-f5d5-779a-b59f85e204a8.png",
+      "sha256": "2c0d3b18c53e1b11ed2aebd40b2473d68625a8e7af9e8557b7cee4581af275f5"
+    },
+    {
+      "kind": "weapons",
+      "name": "melee",
+      "uuid": "2f59173c-4bed-b6c3-2191-dea9b58be9c7",
+      "file": "weapons/2f59173c-4bed-b6c3-2191-dea9b58be9c7.png",
+      "sha256": "7b60ca12ceaf0187f3d19740eaf027c5a58d97b2944c42e60d84b301668d4472"
+    },
+    {
+      "kind": "weapons",
+      "name": "bandit",
+      "uuid": "410b2e0b-4ceb-1321-1727-20858f7f3477",
+      "file": "weapons/410b2e0b-4ceb-1321-1727-20858f7f3477.png",
+      "sha256": "a085ad5244df0170e324f0946096a0307087d1f4e6841c836553da14c64683ef"
+    },
+    {
+      "kind": "weapons",
+      "name": "shorty",
+      "uuid": "42da8ccc-40d5-affc-beec-15aa47b42eda",
+      "file": "weapons/42da8ccc-40d5-affc-beec-15aa47b42eda.png",
+      "sha256": "7b606f8d09a0d1358550f11ac9ceb1606576918bd4352c6bfc3c9dedf4f3fc56"
+    },
+    {
+      "kind": "weapons",
+      "name": "frenzy",
+      "uuid": "44d4e95c-4157-0037-81b2-17841bf2e8e3",
+      "file": "weapons/44d4e95c-4157-0037-81b2-17841bf2e8e3.png",
+      "sha256": "4bfff928e83fe079c724d5131f220f1bf6dd19f6a0506446c871fe46c4a75f0a"
+    },
+    {
+      "kind": "weapons",
+      "name": "spectre",
+      "uuid": "462080d1-4035-2937-7c09-27aa2a5c27a7",
+      "file": "weapons/462080d1-4035-2937-7c09-27aa2a5c27a7.png",
+      "sha256": "43d456f579a9e90e1fcb35838d53c9218209491bb7afd3fb17c851c975b5529f"
+    },
+    {
+      "kind": "weapons",
+      "name": "guardian",
+      "uuid": "4ade7faa-4cf1-8376-95ef-39884480959b",
+      "file": "weapons/4ade7faa-4cf1-8376-95ef-39884480959b.png",
+      "sha256": "8a355d0130ebebc3c5ac69e0d654886b25ab22c512aade74478e76fb69f86576"
+    },
+    {
+      "kind": "weapons",
+      "name": "ares",
+      "uuid": "55d8a0f4-4274-ca67-fe2c-06ab45efdf58",
+      "file": "weapons/55d8a0f4-4274-ca67-fe2c-06ab45efdf58.png",
+      "sha256": "eab2c23c6b9b8c4d6fe7118f5033661e95be37e86db072c13f3fadea4e49d8e4"
+    },
+    {
+      "kind": "weapons",
+      "name": "outlaw",
+      "uuid": "5f0aaf7a-4289-3998-d5ff-eb9a5cf7ef5c",
+      "file": "weapons/5f0aaf7a-4289-3998-d5ff-eb9a5cf7ef5c.png",
+      "sha256": "2d4d10d993ec8b4a62862d988c2febdd1107dad588f258292a08d773afb630bf"
+    },
+    {
+      "kind": "weapons",
+      "name": "odin",
+      "uuid": "63e6c2b6-4a8e-869c-3d4c-e38355226584",
+      "file": "weapons/63e6c2b6-4a8e-869c-3d4c-e38355226584.png",
+      "sha256": "05522897852930084b5f73253f7e462081d90b1cd036c3e21ca8ec6dedfcff69"
+    },
+    {
+      "kind": "weapons",
+      "name": "bucky",
+      "uuid": "910be174-449b-c412-ab22-d0873436b21b",
+      "file": "weapons/910be174-449b-c412-ab22-d0873436b21b.png",
+      "sha256": "f703316144468f99be3015001d6752696436b5e6877ca08c00d9ae7ebd86e0cd"
+    },
+    {
+      "kind": "weapons",
+      "name": "vandal",
+      "uuid": "9c82e19d-4575-0200-1a81-3eacf00cf872",
+      "file": "weapons/9c82e19d-4575-0200-1a81-3eacf00cf872.png",
+      "sha256": "07c9a2d4dc6b7926d023163237dd508104be3fec2b5712cdc1a5301bb294457d"
+    },
+    {
+      "kind": "weapons",
+      "name": "operator",
+      "uuid": "a03b24d3-4319-996d-0f8c-94bbfba1dfc7",
+      "file": "weapons/a03b24d3-4319-996d-0f8c-94bbfba1dfc7.png",
+      "sha256": "a58b84d5b9d553b405e5f2868c2fb79591e7bf8b504927afb813919d89ef832e"
+    },
+    {
+      "kind": "weapons",
+      "name": "bulldog",
+      "uuid": "ae3de142-4d85-2547-dd26-4e90bed35cf7",
+      "file": "weapons/ae3de142-4d85-2547-dd26-4e90bed35cf7.png",
+      "sha256": "91b75b4f7805b7ae4e59a7d01d98945e24412afb635b3ed5df1603fd6eb6bdfe"
+    },
+    {
+      "kind": "weapons",
+      "name": "marshal",
+      "uuid": "c4883e50-4494-202c-3ec3-6b8a9284f00b",
+      "file": "weapons/c4883e50-4494-202c-3ec3-6b8a9284f00b.png",
+      "sha256": "4116126f1e58f83ad9c00fb1b5f98530a312f94cf3d49c29f1f19a2543837478"
+    },
+    {
+      "kind": "weapons",
+      "name": "sheriff",
+      "uuid": "e336c6b8-418d-9340-d77f-7a9e4cfe0702",
+      "file": "weapons/e336c6b8-418d-9340-d77f-7a9e4cfe0702.png",
+      "sha256": "8d6bce7a8af55e9bc1330c0c2b8883383564932e651f32fbc2e85b6a5d9decf2"
+    },
+    {
+      "kind": "weapons",
+      "name": "judge",
+      "uuid": "ec845bf4-4f79-ddda-a3da-0db3774b2794",
+      "file": "weapons/ec845bf4-4f79-ddda-a3da-0db3774b2794.png",
+      "sha256": "2f870edaa9af995e908c4d42e56298e4a1dbdc2ab31a48d94b9ba64f313f8f16"
+    },
+    {
+      "kind": "weapons",
+      "name": "phantom",
+      "uuid": "ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a",
+      "file": "weapons/ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a.png",
+      "sha256": "3eebd86204dc44dd5bd31cc54b7a2dcbac87ca9d40de0f608c183c896ec6c553"
+    },
+    {
+      "kind": "weapons",
+      "name": "stinger",
+      "uuid": "f7e1b454-4ad4-1063-ec0a-159e56b58941",
+      "file": "weapons/f7e1b454-4ad4-1063-ec0a-159e56b58941.png",
+      "sha256": "19f73f1cd913a2773ad25827037395572aaf6474402cefb82462c905624c2c60"
+    }
+  ]
+}

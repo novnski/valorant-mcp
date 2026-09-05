@@ -1,9 +1,12 @@
+import { SharedReads, requestSignal } from "./request-context";
+import { TransientCache } from "./transient-cache";
 import { ValorantInputError } from "./errors";
 // Lineup search runtime over the Strats.gg open lineups API.
 // Stateless apart from short-lived in-memory map/character catalogs.
 
 import {
   StratsClient,
+  StratsApiError,
   type StratsCharacter,
   type StratsGroup,
   type StratsLineup,
@@ -22,9 +25,13 @@ export type LineupSearchInput = {
   level?: LineupLevelFilter;
   query?: string;
   limit: number;
+  mapBudget?: number;
+  sort?: "views" | "recent" | "relevance";
 };
 
 export type NormalizedLineup = {
+  source: "strats.gg";
+  patch_validation: "unknown";
   id: string;
   agent: string;
   map: string;
@@ -53,26 +60,59 @@ const LEVEL_ALIASES: Record<string, string> = {
 };
 
 export class LineupsRuntime {
-  private mapsCache: StratsMap[] | null = null;
-  private charactersCache: StratsCharacter[] | null = null;
+  private readonly reads = new SharedReads();
+  private readonly mapsCache = new TransientCache<StratsMap[]>(2, 1024 * 1024);
+  private readonly charactersCache = new TransientCache<StratsCharacter[]>(2, 1024 * 1024);
+  private readonly groupsCache = new TransientCache<StratsGroup[]>(32, 12 * 1024 * 1024);
+  private readonly detailsCache = new TransientCache<NormalizedLineup>(64, 4 * 1024 * 1024);
 
   constructor(private readonly client: StratsClient = new StratsClient()) {}
 
-  async searchLineups(input: LineupSearchInput): Promise<{ maps_searched: string[]; matches: NormalizedLineup[] }> {
+  async searchLineups(input: LineupSearchInput) {
     const agentName = input.agent.trim();
     if (!agentName) throw new ValorantInputError("Provide an agent such as Sova to search lineups.");
     const character = await this.resolveCharacter(agentName);
     const side = input.side ?? "attacker";
 
-    const maps = input.map?.trim() ? [await this.resolveMap(input.map.trim())] : await this.allMaps();
+    const requestedMaps = input.map?.trim() ? [await this.resolveMap(input.map.trim())] : await this.allMaps();
+    const mapBudget = input.map ? 1 : Math.min(10, Math.max(1, input.mapBudget ?? 4));
+    const maps = requestedMaps.slice(0, mapBudget);
+    const coverage = {
+      mapBudget,
+      mapsAvailable: requestedMaps.length,
+      succeeded: [] as string[],
+      failed: [] as Array<{ map: string; code: string }>,
+      skipped: requestedMaps.slice(mapBudget).map((m) => m.name),
+      noSource: [] as string[],
+    };
     const mapsSearched = new Set<string>();
 
     const collected: Array<{ group: StratsGroup; lineup: StratsLineup; map: StratsMap }> = [];
     for (const map of maps) {
       const source = map.map_sources?.find((candidate) => candidate.overview === side) ?? null;
-      if (!source) continue;
+      requestSignal()?.throwIfAborted();
+      if (!source) {
+        coverage.noSource.push(map.name);
+        continue;
+      }
+      const key = JSON.stringify([source.id, character.id]);
+      let groups: StratsGroup[];
+      try {
+        groups = await this.reads.run(`groups:${key}`, async () => {
+          const cached = this.groupsCache.get(key);
+          if (cached) return cached;
+          const fresh = await this.client.listGroupedLineups(source.id, character.id);
+          this.groupsCache.set(key, fresh, 5 * 60_000);
+          return fresh;
+        });
+      } catch (error) {
+        requestSignal()?.throwIfAborted();
+        if (error instanceof StratsApiError && error.code === "cancelled") throw error;
+        coverage.failed.push({ map: map.name, code: error instanceof StratsApiError ? error.code : "unavailable" });
+        continue;
+      }
       mapsSearched.add(map.id);
-      const groups = await this.client.listGroupedLineups(source.id, character.id);
+      coverage.succeeded.push(map.name);
       for (const group of groups ?? []) {
         for (const lineup of group.lineups ?? []) {
           if (lineup.status !== "approved") continue;
@@ -85,31 +125,78 @@ export class LineupsRuntime {
       .map(({ group, lineup, map }) => this.normalize(lineup, character.name, map, side, group.point))
       .filter((lineup) => this.matchesFilters(lineup, input));
 
-    const sorted = [...normalized].sort((a, b) => b.views - a.views);
-    return { maps_searched: [...mapsSearched], matches: sorted.slice(0, input.limit) };
+    const relevance = (lineup: NormalizedLineup) =>
+      (
+        input.query
+          ?.toLowerCase()
+          .split(/[^a-z0-9]+/)
+          .filter(Boolean) ?? []
+      ).reduce(
+        (sum, word) =>
+          sum +
+          (lineup.title.toLowerCase().includes(word) ? 2 : 0) +
+          (lineup.description?.toLowerCase().includes(word) ? 1 : 0),
+        0,
+      );
+    const posted = (lineup: NormalizedLineup) => Date.parse(lineup.posted_at ?? "") || 0;
+    const sorted = [...normalized].sort(
+      (a, b) =>
+        (input.sort === "recent"
+          ? posted(b) - posted(a)
+          : input.sort === "relevance"
+            ? relevance(b) - relevance(a)
+            : 0) ||
+        b.views - a.views ||
+        a.id.localeCompare(b.id),
+    );
+    return {
+      maps_searched: [...mapsSearched],
+      matches: sorted.slice(0, input.limit),
+      coverage,
+      sort: input.sort ?? "views",
+      patch_validation: "unknown" as const,
+      limitations: [
+        "Community lineups have not been tested in-game or validated against the current patch. Views and age do not establish validity.",
+      ],
+    };
   }
 
   async getLineup(lineupId: string): Promise<NormalizedLineup> {
-    const raw = await this.client.getLineup(lineupId);
-    const side = (raw.map_source?.overview === "defender" ? "defender" : "attacker") as LineupSide;
-    const agentName = raw.character?.name ?? "Unknown agent";
-    return this.normalize(
-      raw,
-      agentName,
-      { id: raw.map_id ?? "unknown", name: raw.map_name ?? raw.map_id ?? "Unknown map" },
-      side,
-      null,
-    );
+    return this.reads.run(`lineup:${lineupId}`, async () => {
+      const cached = this.detailsCache.get(lineupId);
+      if (cached) return cached;
+      const raw = await this.client.getLineup(lineupId);
+      const side = raw.map_source?.overview === "defender" ? "defender" : "attacker";
+      const result = this.normalize(
+        raw,
+        raw.character?.name ?? "Unknown agent",
+        { id: raw.map_id ?? "unknown", name: raw.map_name ?? raw.map_id ?? "Unknown map" },
+        side,
+        null,
+      );
+      this.detailsCache.set(lineupId, result, 5 * 60_000);
+      return result;
+    });
   }
 
   private async allMaps(): Promise<StratsMap[]> {
-    if (!this.mapsCache) this.mapsCache = await this.client.listMaps();
-    return this.mapsCache;
+    return this.reads.run("maps", async () => {
+      const cached = this.mapsCache.get("all");
+      if (cached) return cached;
+      const fresh = await this.client.listMaps();
+      this.mapsCache.set("all", fresh, 10 * 60_000);
+      return fresh;
+    });
   }
 
   private async allCharacters(): Promise<StratsCharacter[]> {
-    if (!this.charactersCache) this.charactersCache = await this.client.listCharacters();
-    return this.charactersCache;
+    return this.reads.run("characters", async () => {
+      const cached = this.charactersCache.get("all");
+      if (cached) return cached;
+      const fresh = await this.client.listCharacters();
+      this.charactersCache.set("all", fresh, 10 * 60_000);
+      return fresh;
+    });
   }
 
   private async resolveCharacter(name: string): Promise<StratsCharacter> {
@@ -151,6 +238,8 @@ export class LineupsRuntime {
   ): NormalizedLineup {
     const rawLevel = lineup.level?.trim().toLocaleLowerCase() ?? null;
     return {
+      source: "strats.gg",
+      patch_validation: "unknown",
       id: lineup.id,
       agent: agentName,
       map: map.name,
@@ -185,7 +274,8 @@ export class LineupsRuntime {
     }
     if (input.query?.trim()) {
       const haystack = norm(`${lineup.title} ${lineup.description ?? ""}`);
-      const tokens = norm(input.query)
+      const tokens = input.query
+        .toLowerCase()
         .split(/[^a-z0-9]+/)
         .filter(Boolean);
       if (!tokens.every((token) => haystack.includes(token))) return false;

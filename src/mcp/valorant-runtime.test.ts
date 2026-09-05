@@ -118,8 +118,9 @@ describe("ValorantRuntime", () => {
       match: { matchId: "henrik-live-match", map: "Haven", mode: "Competitive" },
       focus: { puuid: "focus-puuid" },
     });
-    expect(analysis.analysis?.turningPoints.some((point) => point.roundNumber === 1)).toBe(true);
-    expect(analysis.features.duels.available).toBe(true);
+    expect(analysis.analysis?.recommendation).toBeNull();
+    expect(analysis.features.duels.available).toBe(false);
+    expect(analysis.limitations.join(" ")).toContain("kills evidence is partial");
     expect(analysis.spatialCoverage).toMatchObject({
       totalKillEvents: 1,
       eventsWithPositions: 1,

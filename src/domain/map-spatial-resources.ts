@@ -125,3 +125,7 @@ export function normalizeMapSpatialPosition(
 function key(value: string): string {
   return value.trim().toLowerCase();
 }
+
+export function mapTransformFingerprintInput(): string {
+  return JSON.stringify(resources);
+}

@@ -1,8 +1,9 @@
+import { projectionDependencyFingerprint } from "./projection-dependencies";
 import type { MatchDetail } from "../domain/types";
 
-export const matchBaseProjectionVersion = "match-base-cache-v1";
-export const matchFocusProjectionVersion = "match-focus-cache-v1";
-export const matchTimelineProjectionVersion = "match-timeline-cache-v1";
+export const matchBaseProjectionVersion = `match-base-cache-v2:${projectionDependencyFingerprint}`;
+export const matchFocusProjectionVersion = `match-focus-cache-v2:${projectionDependencyFingerprint}`;
+export const matchTimelineProjectionVersion = `match-timeline-cache-v2:${projectionDependencyFingerprint}`;
 
 export type MatchCacheSource = "local-projection" | "local-reprojected" | "recent-list" | "henrik-detail" | "memory";
 

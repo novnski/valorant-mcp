@@ -1,3 +1,4 @@
+import { killRoundOffset } from "./match-kill-round";
 import type {
   MatchDetail,
   MatchKillEvent,
@@ -9,7 +10,7 @@ import type {
 export class MatchRoundEvidenceService {
   analyze(match: MatchDetail): MatchRoundEvidenceAnalysis | null {
     if (!match.rounds.length) return null;
-    const eventOffset = match.killEvents.some((event) => event.round === 0) ? 1 : 0;
+    const eventOffset = killRoundOffset(match);
     const rosterIndex = buildRosterIndex(match);
     const rounds = match.rounds.map((round) => {
       const kills = match.killEvents

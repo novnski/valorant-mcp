@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-09-05T22:53:03.719Z",
+  "source": "playvalorant.com",
+  "articles": [
+    {
+      "id": "bundled-13.05",
+      "title": "VALORANT Patch Notes 13.05",
+      "date": "2026-09-01T13:00:00.000Z",
+      "category": "Game Updates",
+      "url": "https://playvalorant.com/en-us/news/game-updates/valorant-patch-notes-13-05/",
+      "content": null
+    },
+    {
+      "id": "bundled-13.04",
+      "title": "VALORANT Patch Notes 13.04",
+      "date": "2026-08-18T13:00:00.000Z",
+      "category": "Game Updates",
+      "url": "https://playvalorant.com/en-us/news/game-updates/valorant-patch-notes-13-04/",
+      "content": null
+    }
+  ]
+}
